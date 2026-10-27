@@ -6,7 +6,7 @@ argument-hint: "[results-path-or-EXPERIMENT_RESULTS.md]"
 
 # Security Experiment Integrity Audit (`sec-experiment-audit`)
 
-> **Reviewer slot**: resolve per ARIS selectable-reviewer contract — **fresh
+> **Reviewer slot**: resolve per the reviewer contract in `shared-references/reviewer-contract.md` — **fresh
 > context, reads artifacts directly** (result files, logs, oracle outputs,
 > tracker rows), never the executor's summary. Under the configured
 > AntiGravity/Gemini route this is a cross-family review; receipt = `accept`.

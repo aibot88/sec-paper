@@ -6,7 +6,7 @@ argument-hint: "[security-direction] [— auto proceed: false] [— auto write: 
 
 # Full Security Research Pipeline: Direction → Experiments → Submission (`sec-research-pipeline`)
 
-> **Reviewer slots**: resolve per ARIS selectable-reviewer contract throughout;
+> **Reviewer slots**: resolve per the reviewer contract in `shared-references/reviewer-contract.md` throughout;
 > forward invocation reviewer/model/effort overrides to reviewer-bearing
 > children. Same-family verdicts stay `provisional`; only completed positive
 > known-cross-family or deterministic evidence gates produce `accepted`.
@@ -121,7 +121,9 @@ Up to 4 rounds of hard-gated review→fix→re-review. Exit on `STOP` (all hard 
 
 ### Stage 4: Research Summary & Writing Handoff
 
-Assemble `NARRATIVE_REPORT.md` from: `IDEA_REPORT.md` (chosen candidate, threat model, novelty justification), `FINAL_PROPOSAL.md` (anchors, mechanism), `EXPERIMENT_RESULTS.md` + `RESULT_TO_CLAIM.md` (claims→evidence), `SEC_AUTO_REVIEW.md` (weaknesses fixed, remaining limitations).
+Assemble `NARRATIVE_REPORT.md` from: `IDEA_REPORT.md` (chosen candidate, threat model, novelty justification), `FINAL_PROPOSAL.md` (anchors, mechanism), `EXPERIMENT_RESULTS.md` + `RESULT_TO_CLAIM.md` (claims→evidence), `SEC_AUTO_REVIEW.md` (weaknesses fixed, remaining limitations), `EXPERIMENT_AUDIT.md` (evidence-integrity verdict).
+
+**Also seed `FACT_PACK.md`** from `templates/FACT_PACK_AND_FORBIDDEN_CLAIMS_TEMPLATE.md` — populate benchmark provenance, the verified vulnerability/result ledger, and headline metrics from oracle-verified results; carry over the forbidden-claim rows from `research_contract.md` and `IDEA_REPORT.md`. Stage 5 cannot begin without it — `sec-paper-writing` treats it as the write-lock.
 
 The report **must** contain (security additions marked ★):
 - Problem statement + core claim(s) as finally refined (with claim-migration log);
@@ -151,7 +153,7 @@ Then the pipeline report:
 - FACT_PACK.md seeded: [yes/no]  - Disclosure pending: [CVE-... / none]
 ```
 
-Render HTML if `RENDER_HTML`.
+Render HTML if `RENDER_HTML` and `/render-html` is available (optional, non-blocking).
 
 ### Stage 5: Paper Writing — `/sec-paper-writing` (optional)
 

@@ -6,7 +6,7 @@ argument-hint: "[paper-dir-or-main.tex] [— rounds: 2] [— venue: USENIX_SEC|I
 
 # Security Paper Improve Loop (`sec-paper-improve-loop`)
 
-> **Reviewer slot**: resolve per ARIS selectable-reviewer contract — fresh
+> **Reviewer slot**: resolve per the reviewer contract in `shared-references/reviewer-contract.md` — fresh
 > context per round reading `main.tex` + `FACT_PACK.md` + appendices directly.
 > Under the configured AntiGravity route, receipts are cross-family `accept`.
 

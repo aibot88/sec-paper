@@ -6,7 +6,7 @@ argument-hint: "[EXPERIMENT_PLAN.md-or-chosen-idea] [— code review: true] [—
 
 # Workflow S1.5: Security Experiment Bridge (`sec-experiment-bridge`)
 
-> **Reviewer slots**: resolve per ARIS selectable-reviewer contract. The Phase 2.5
+> **Reviewer slots**: resolve per the reviewer contract in `shared-references/reviewer-contract.md`. The Phase 2.5
 > code review is a **fresh-context** reviewer — the implementer never reviews
 > its own harness. Same-family results are `provisional`, never `accepted`.
 

@@ -6,7 +6,7 @@ argument-hint: "[security-direction-or-target-boundary]"
 
 # Security & Web Application Research Idea Creator (`sec-idea-creator`)
 
-> **Before each reviewer slot**, follow ARIS's selectable-reviewer contract:
+> **Before each reviewer slot**, follow the reviewer contract in `shared-references/reviewer-contract.md`:
 > resolve invocation override → `.aris/reviewer.json` → host default with
 > `reviewer_route.py` when available. **Critical independence rule:** Phase 2
 > (divergent brainstorming) and Phase 4 (adversarial triage) MUST run in
@@ -270,10 +270,10 @@ Write the canonical report to `idea-stage/IDEA_REPORT.md`.
 **Candidates evaluated**: X generated → Y feasible after Phase 3 → Z piloted → W recommended
 **Review provenance**: Phase 2 generator = [model/session], Phase 4 fresh-context reviewer = [model/session]
 
-## 1. Security Landscape & Broken Invariants
+## Literature Landscape
 [Summarize key prior mechanisms, their hidden assumptions, and the exact cross-layer or primitive-mapping gaps]
 
-## 2. Recommended Candidates (Ranked)
+## Ranked Ideas
 
 ### Candidate 1: [Title] — [Track: Attack / Defense / Measurement]
 1. **Security Property & Problem Type**: [One sentence: which C/I/A/Authorization/Isolation property breaks or is enforced, and why it matters]
@@ -298,17 +298,17 @@ Write the canonical report to `idea-stage/IDEA_REPORT.md`.
    - **Empirical / Formal Evidence**: [exact reproduction trace or numbers]
    - **Claim Revision Log (if any)**: [Original claim → Revised claim]
 
-## 3. Pilot Comparison Table
+## Pilot Comparison Table
 | Candidate | Track | Target / Harness | Oracle & Unit | Adaptive / Counterexample Check | Verdict |
 |-----------|-------|------------------|---------------|---------------------------------|---------|
 | ...       | ...   | ...              | ...           | ...                             | ...     |
 
-## 4. Refuted, Blocked, and Deferred Candidates (Anti-Repetition Memory)
+## Refuted, Blocked, and Deferred Candidates
 | Candidate | Status (`REFUTED` / `BLOCKED` / `DEFERRED`) | Exact Technical or Operational Reason |
 |-----------|---------------------------------------------|---------------------------------------|
 | ...       | ...                                         | ...                                   |
 
-## 5. Forbidden-Claim & Ethics Pre-Flight Seed
+## Forbidden-Claim & Ethics Pre-Flight Seed
 - **Forbidden Claims (Do NOT write in downstream paper)**:
   - [e.g., Do not claim "zero false positives in general"; bound to tested workflow classes]
   - [e.g., Do not call mechanism "novel" until DBLP + RFC + advisory cross-check is locked]
@@ -328,7 +328,7 @@ If `research-wiki/` exists and `research_wiki.py` is available, record both reco
 
 ```text
 /sec-idea-creator "direction"      → Security-property cards + Oracle-backed pilots + Forbidden-claim seed
-/experiment-bridge                 → Full benchmark / target harness implementation & multi-trial evaluation
-/auto-review-loop                  → Adversarial iteration (with A3 adaptive-attacker & oracle audits)
+/sec-experiment-bridge             → Full benchmark / target harness implementation & multi-trial evaluation
+/sec-auto-review-loop              → Adversarial iteration (with A3 adaptive-attacker & oracle audits)
 /sec-paper-writing                 → Big-Four manuscript drafting (Threat Model table, Fact Pack, Ethics & Open Science)
 ```

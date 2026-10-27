@@ -6,7 +6,7 @@ argument-hint: "[security-idea-or-claim-description] [— composed: idea-stage/I
 
 # Security Root-Cause & Mechanism Novelty Check (`sec-novelty-check`)
 
-> **Before each reviewer slot**, follow ARIS's selectable-reviewer contract:
+> **Before each reviewer slot**, follow the reviewer contract in `shared-references/reviewer-contract.md`:
 > resolve invocation override → `.aris/reviewer.json` → host default with
 > `reviewer_route.py`. Open a **fresh** reviewer session for Phase C.
 

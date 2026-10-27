@@ -6,7 +6,7 @@ argument-hint: "[security-direction] [— ref paper: <path-or-url>] [— auto pr
 
 # Workflow S1: Security Idea Discovery Pipeline (`sec-idea-discovery`)
 
-> **Before each reviewer slot**, follow ARIS's selectable-reviewer contract:
+> **Before each reviewer slot**, follow the reviewer contract in `shared-references/reviewer-contract.md`:
 > resolve invocation → `.aris/reviewer.json` → host default with
 > `reviewer_route.py`. Save the route and actual returned identity; unavailable
 > selections are `REVIEW_UNAVAILABLE`. `sec-novelty-check` and
@@ -172,5 +172,5 @@ Gate: `refine-logs/FINAL_PROPOSAL.md` exists. Then run the final `idea_discovery
    - `## Forbidden-Claim & Ethics Seed` — disclosure trigger, forbidden claims
    - `## Dead-End & Blocked Register` — REFUTED / BLOCKED / DEFERRED candidates with exact reasons (anti-repetition memory)
 2. If `research-wiki/` exists, upsert recommended + archived candidates.
-3. If `RENDER_HTML`, run `/render-html idea-stage/IDEA_REPORT.md --no-review`.
+3. If `RENDER_HTML` and `/render-html` is available, run `/render-html idea-stage/IDEA_REPORT.md --no-review`; otherwise skip silently (rendering is cosmetic).
 4. Final checkpoint message: top candidate, threat model, pilot verdict, novelty verdict, review verdict, first experiment command.

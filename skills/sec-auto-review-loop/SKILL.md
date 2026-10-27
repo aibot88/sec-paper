@@ -6,7 +6,7 @@ argument-hint: "[direction-or-artifacts] [— difficulty: medium|hard|nightmare]
 
 # Workflow S2: Security Auto Review Loop (`sec-auto-review-loop`)
 
-> **Reviewer slots**: resolve per ARIS selectable-reviewer contract. Each review
+> **Reviewer slots**: resolve per the reviewer contract in `shared-references/reviewer-contract.md`. Each review
 > round is **fresh-context for the artifacts** — the reviewer reads result files
 > and diffs, never the executor's self-assessment. The same reviewer *session*
 > may persist across rounds for objection-continuity (same rationale as

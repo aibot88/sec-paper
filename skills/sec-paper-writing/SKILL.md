@@ -104,7 +104,7 @@ The parts this skill itself owns — and which no external skill supplies — ar
 
 ## Pre-Submission Audit Gate
 
-Before compiling the final PDF, run this 6-point check against `FACT_PACK.md` and `FORBIDDEN_CLAIMS.md`:
+Before compiling the final PDF, run this 6-point check against `FACT_PACK.md` and the forbidden-claim source (`idea-stage/FORBIDDEN_CLAIMS.md` if materialized, else the `Forbidden-Claim & Ethics Pre-Flight Seed` section of `IDEA_REPORT.md` + `research_contract.md`):
 
 - [ ] **Numeral Parity**: Every number in Abstract, Intro, Tables, and Conclusion matches `FACT_PACK.md` verbatim.
 - [ ] **Forbidden-Claim Clean**: Zero occurrences of banned overclaims (`novel` without citation proof, `0% FP` without scope bound, `provably secure` without formal theorem + assumption list).

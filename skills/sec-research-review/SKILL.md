@@ -6,7 +6,7 @@ argument-hint: "[idea-or-paper-scope] [— composed: idea-stage/IDEA_REPORT.md]"
 
 # Security PC Adversarial Review (`sec-research-review`)
 
-> **Before each reviewer slot**, follow ARIS's selectable-reviewer contract:
+> **Before each reviewer slot**, follow the reviewer contract in `shared-references/reviewer-contract.md`:
 > resolve invocation override → `.aris/reviewer.json` → host default (`--tier deep`).
 > Pass **file paths only** (never executor-written summaries that hide flaws).
 > Record actual model identity, family relation, and trace in `.aris/traces/`.

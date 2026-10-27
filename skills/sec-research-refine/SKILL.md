@@ -6,7 +6,7 @@ argument-hint: "[security-problem | rough-approach] [— max rounds: N, threshol
 
 # Security Research Refine: Threat-Model-Anchored Method Refinement (`sec-research-refine`)
 
-> **Before each reviewer slot**, follow ARIS's selectable-reviewer contract:
+> **Before each reviewer slot**, follow the reviewer contract in `shared-references/reviewer-contract.md`:
 > resolve invocation override → `.aris/reviewer.json` → host default with
 > `reviewer_route.py`. The reviewer session (`agent_id`) persists across rounds
 > for continuity — unlike `sec-idea-creator` Phase 4, iterative refinement
