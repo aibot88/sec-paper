@@ -1,6 +1,6 @@
 # sec-paper：网络安全、Web 应用安全与系统安全科研论文套件
 
-`sec-paper` 是一套独立维护、可与 ARIS（Codex / OpenCode 多 Agent 科研框架）无缝组合的**网络安全、Web 应用安全与系统安全**论文选题、实验验证与顶会写作 Skill 仓库。
+`sec-paper` 是一套独立维护、可与 ARIS（Codex / OpenCode 多 Agent 科研框架）无缝组合的**网络安全、Web 应用安全与系统安全**全流程科研 Skill 仓库——从 `/sec-idea-discovery` 编排的完整选题流水线（`sec-research-lit → sec-idea-creator → sec-novelty-check → sec-research-review → sec-research-refine-pipeline`），到 Big-Four 顶会稿件写作与投稿前审计（`sec-paper-writing`）。
 
 目标顶会：**IEEE S&P (Oakland)、USENIX Security、ACM CCS、NDSS**，同时覆盖 **PETS、ACSAC、AsiaCCS、RAID**。
 
@@ -25,8 +25,15 @@
 
 | 模块 | 核心机制 | 解决什么痛点 |
 |------|----------|--------------|
-| **[`skills/sec-idea-creator/SKILL.md`](skills/sec-idea-creator/SKILL.md)** | **安全性质先行 + 经典原语映射 + 反缝合铁律 + 独立上下文审稿 + Oracle 先行 Pilot** | 直接替代或并存于通用 `idea-creator`，产出经得起安全 PC 追问的 6 字段选题卡与四态 Pilot 结论 |
-| **[`skills/sec-paper-writing/SKILL.md`](skills/sec-paper-writing/SKILL.md)** | **Big-Four 章节骨架 + Threat Model 能力边界表 + A1/A2/A3 自适应攻击者 + Fact Pack 溯源 + USENIX '26 双必选附录** | 杜绝无威胁模型主张、无自适应攻击评估、数字前后打架和未钉死 SHA/CVE 的稿件 |
+| **[`skills/sec-idea-discovery/SKILL.md`](skills/sec-idea-discovery/SKILL.md)** | **W1 全流程编排器**：读约束与授权范围 → 文献 → 生成+Pilot → 查新 → PC 审稿 → 细化+实验计划；带 `run_state` 证据门与断点续跑 | 替代通用 `idea-discovery`，把"只有 idea-creator"补成完整流水线 |
+| **[`skills/sec-research-lit/SKILL.md`](skills/sec-research-lit/SKILL.md)** | **Big-Four 10–15 年奠基 + 近 3 年前沿 + RFC/W3C/NVD/修复 SHA 多源检索**，按信任边界/原语映射/Oracle 拆解邻作 | 防止只看近两年 ML 论文关键词空白、漏掉系统安全奠基工作 |
+| **[`skills/sec-idea-creator/SKILL.md`](skills/sec-idea-creator/SKILL.md)** | **安全性质先行 + 经典原语映射 + 反缝合铁律 + 独立上下文审稿 + Oracle 先行 Pilot** | 产出经得起安全 PC 追问的 6 字段选题卡与四态 Pilot 结论 |
+| **[`skills/sec-novelty-check/SKILL.md`](skills/sec-novelty-check/SKILL.md)** | **根因机制/信任边界级查新**（而非产品名），兼容 `idea_discovery_gate.py` 的 PROCEED/CAUTION/ABANDON 回执 | 把"换个产品名"挡在门外，又不错杀有真实 delta 的邻近工作 |
+| **[`skills/sec-research-review/SKILL.md`](skills/sec-research-review/SKILL.md)** | **冷读式 Big-Four PC 攻击审稿**：威胁模型循环前提、可删性、Oracle 循环、A3 缺位、伦理授权 | 替代通用 ML 评审提问（模型结构/训练曲线），直击安全拒稿点 |
+| **[`skills/sec-research-refine/SKILL.md`](skills/sec-research-refine/SKILL.md)** | **双锚点细化**：Security Problem Anchor + Threat-Model Anchor 冻结，主张迁移必须显式记账 | 防止细化过程悄悄漂移威胁模型或缝合模块 |
+| **[`skills/sec-experiment-plan/SKILL.md`](skills/sec-experiment-plan/SKILL.md)** | **Claim→Evidence 矩阵 + RQ1–RQ4（含强制 A3）+ 消融 + 统计协议 + 伦理检查点** | 实验规划期就锁死 Oracle 与去重单位，规划阶段拒掉循环 Oracle |
+| **[`skills/sec-research-refine-pipeline/SKILL.md`](skills/sec-research-refine-pipeline/SKILL.md)** | **串接 refine → experiment-plan**，产出 FINAL_PROPOSAL + EXPERIMENT_PLAN + TRACKER + SUMMARY | 一键从选题走到可执行实验命令 |
+| **[`skills/sec-paper-writing/SKILL.md`](skills/sec-paper-writing/SKILL.md)** | **Big-Four 章节骨架 + Threat Model 能力边界表 + A1/A2/A3 + Fact Pack 溯源 + USENIX '26 双必选附录** | 杜绝无威胁模型主张、无自适应攻击评估、数字打架和未钉死 SHA/CVE |
 | **[`references/web-and-system-threat-models.md`](references/web-and-system-threat-models.md)** | **W1–W6 六类 Web/系统攻击者模板 + A1/A2/A3 三级攻击者递进 + In/Out-of-Scope 表** | 选定方向后 3 分钟拉出标准威胁模型边界 |
 | **[`references/evaluation-and-oracle-discipline.md`](references/evaluation-and-oracle-discipline.md)** | **4 类合法 Oracle vs 4 类禁用循环 Oracle + 去重单位表 + 随机实验统计规范** | 防止把告警数、覆盖率、LLM 自评或单次短跑当成论文硬证据 |
 | **[`references/anti-patterns-and-forbidden-claims.md`](references/anti-patterns-and-forbidden-claims.md)** | **8 大网安立项与写作反模式（Bad → Rewritten 对照）** | 在 Phase 4 筛选和投稿前自检中直接拦下拒稿雷区 |
@@ -51,6 +58,15 @@ bash /Users/aibot/script/sec-paper/tools/install_sec_paper.sh --codex
 调用示例：
 
 ```text
-/sec-idea-creator "Web API 网关与后端微服务之间的多租户鉴权状态不一致漏洞"
+# 全流程（推荐入口）：约束 → 文献 → 候选+Pilot → 查新 → PC审稿 → 细化+实验计划
+/sec-idea-discovery "Web API 网关与后端微服务之间的多租户鉴权状态不一致漏洞"
+
+# 或单步独立调用
+/sec-research-lit "stateful web fuzzing"
+/sec-idea-creator "跨租户 BOLA"
+/sec-novelty-check "候选主张描述"
+/sec-research-review "idea-stage/IDEA_REPORT.md"
+/sec-research-refine "问题 | 初步方法"
+/sec-experiment-plan "refine-logs/FINAL_PROPOSAL.md"
 /sec-paper-writing "NARRATIVE_REPORT.md" — venue: USENIX_SEC
 ```

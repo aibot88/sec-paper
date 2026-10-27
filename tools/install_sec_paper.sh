@@ -62,7 +62,7 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-for skill in sec-idea-creator sec-paper-writing; do
+for skill in sec-idea-discovery sec-research-lit sec-idea-creator sec-novelty-check sec-research-review sec-research-refine sec-experiment-plan sec-research-refine-pipeline sec-paper-writing; do
   ln -sfn "$REPO_ROOT/skills/$skill" "$TARGET_DIR/$skill"
   echo "Linked: $TARGET_DIR/$skill -> $REPO_ROOT/skills/$skill"
 done
@@ -70,4 +70,6 @@ done
 if $OVERRIDE_IDEA_CREATOR; then
   ln -sfn "$REPO_ROOT/skills/sec-idea-creator" "$TARGET_DIR/idea-creator"
   echo "Linked override: $TARGET_DIR/idea-creator -> $REPO_ROOT/skills/sec-idea-creator"
+  ln -sfn "$REPO_ROOT/skills/sec-idea-discovery" "$TARGET_DIR/idea-discovery"
+  echo "Linked override: $TARGET_DIR/idea-discovery -> $REPO_ROOT/skills/sec-idea-discovery"
 fi

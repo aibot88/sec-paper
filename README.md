@@ -2,7 +2,7 @@
 
 > **中文文档请参阅 [`README_CN.md`](README_CN.md)。**
 
-`sec-paper` is a standalone, composable skill suite for **cybersecurity, Web application security, and systems security** research — covering the full arc from **hypothesis discovery and oracle-backed pilot experiments (`sec-idea-creator`)** to **Big-Four manuscript drafting and pre-submission auditing (`sec-paper-writing`)**.
+`sec-paper` is a standalone, composable skill suite for **cybersecurity, Web application security, and systems security** research — covering the **full idea-discovery arc** (`sec-idea-discovery` orchestrating `sec-research-lit → sec-idea-creator → sec-novelty-check → sec-research-review → sec-research-refine-pipeline`) through **Big-Four manuscript drafting and pre-submission auditing (`sec-paper-writing`)**.
 
 Target venues: **IEEE S&P (Oakland), USENIX Security, ACM CCS, NDSS**, as well as **PETS / PoPETs, ACSAC, AsiaCCS, and RAID**.
 
@@ -46,10 +46,15 @@ sec-paper/
 ├── README_CN.md
 ├── LICENSE
 ├── skills/
-│   ├── sec-idea-creator/
-│   │   └── SKILL.md          # Web & systems security ideation + oracle-backed pilot workflow
-│   └── sec-paper-writing/
-│       └── SKILL.md          # Big-Four manuscript scaffolding, A1-A3 eval, Ethics & Open Science gate
+│   ├── sec-idea-discovery/             # W1 orchestrator: lit → creator → novelty → review → refine-pipeline
+│   ├── sec-research-lit/               # Big-Four + RFC/CVE/commit-grounded literature & spec survey
+│   ├── sec-idea-creator/               # Ideation + 3-way status gate + oracle-backed pilots + 4-state verdicts
+│   ├── sec-novelty-check/              # Root-cause / trust-boundary novelty vs papers, RFCs, advisories
+│   ├── sec-research-review/            # Fresh-context Big-Four PC adversarial review
+│   ├── sec-research-refine/            # Anchored method refinement (Problem + Threat-Model anchors)
+│   ├── sec-experiment-plan/            # Claim→evidence matrix, RQ1-RQ4 incl. mandatory A3, stats protocol
+│   ├── sec-research-refine-pipeline/   # One-shot refine → experiment-plan composition
+│   └── sec-paper-writing/              # Big-Four manuscript scaffolding + pre-submission audit gate
 ├── references/
 │   ├── web-and-system-threat-models.md       # W1-W6 adversary classes, A1-A3 tiers, capability table
 │   ├── evaluation-and-oracle-discipline.md   # Oracles, deduplication units, Klees et al. CCS'18 rules
@@ -69,15 +74,28 @@ sec-paper/
 ```bash
 git clone https://github.com/aibot88/sec-paper.git ~/script/sec-paper
 
-# Link into an ARIS / Codex project (.agents/skills/) without touching upstream ARIS git files:
+# Link the full suite into an ARIS / Codex project (.agents/skills/):
 bash ~/script/sec-paper/tools/install_sec_paper.sh --project /path/to/your/project
 
-# Optional: also override /idea-creator with /sec-idea-creator in that project:
+# Optional: route /idea-creator AND /idea-discovery to the security variants in that project:
 bash ~/script/sec-paper/tools/install_sec_paper.sh --project /path/to/your/project --override-idea-creator
 
 # Or install globally for OpenCode / Codex:
 bash ~/script/sec-paper/tools/install_sec_paper.sh --opencode
 bash ~/script/sec-paper/tools/install_sec_paper.sh --codex
+```
+
+### Entry points
+
+```text
+/sec-idea-discovery "direction"        # full pipeline: constraints → lit → candidates+pilots → novelty → review → refine+plan
+/sec-research-lit "topic"              # standalone security/spec literature survey
+/sec-idea-creator "direction"          # standalone ideation + oracle pilots
+/sec-novelty-check "claim"             # standalone root-cause novelty audit
+/sec-research-review "paths"           # standalone Big-Four adversarial review
+/sec-research-refine "problem | approach"   # anchored method refinement
+/sec-experiment-plan "refined proposal"     # oracle-first experiment roadmap
+/sec-paper-writing "NARRATIVE_REPORT.md"    # Big-Four manuscript + audit
 ```
 
 ---
