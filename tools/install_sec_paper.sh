@@ -65,7 +65,7 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-for skill in sec-research-pipeline sec-idea-discovery sec-research-lit sec-idea-creator sec-novelty-check sec-research-review sec-research-refine sec-experiment-plan sec-research-refine-pipeline sec-experiment-bridge sec-auto-review-loop sec-paper-writing; do
+for skill in sec-research-pipeline sec-idea-discovery sec-research-lit sec-idea-creator sec-novelty-check sec-research-review sec-research-refine sec-experiment-plan sec-research-refine-pipeline sec-experiment-bridge sec-result-to-claim sec-ablation-planner sec-experiment-audit sec-auto-review-loop sec-paper-writing sec-paper-improve-loop; do
   ln -sfn "$REPO_ROOT/skills/$skill" "$TARGET_DIR/$skill"
   echo "Linked: $TARGET_DIR/$skill -> $REPO_ROOT/skills/$skill"
 done

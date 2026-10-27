@@ -60,7 +60,7 @@ Extract from `EXPERIMENT_PLAN.md`:
 1. **Run order**: sanity → oracle validation → RQ1 ground-truth effectiveness → RQ2 real-world/discovery → RQ3 A3 adaptive → RQ4 overhead/ablation.
 2. **Per experiment block**: target corpus (`app@version`, commit SHA, container image), compared variants/baselines, oracle, experimental unit, budget (requests/time), trial count, MUST-RUN vs NICE-TO-HAVE.
 3. **Environment build sheet**: container images, role accounts, seed DB state, crawl specs, network isolation.
-4. **Claims source**: create/update `idea-stage/docs/research_contract.md` — the ≤2 core claims in falsifiable form; `sec-result-to-claim` (Phase 7) and downstream writing read this file.
+4. **Claims source**: create/update `idea-stage/docs/research_contract.md` from `templates/RESEARCH_CONTRACT_TEMPLATE.md` — frozen anchors + the ≤2 falsifiable claims + forbidden-claim seed; `sec-result-to-claim` (Phase 7) and downstream writing read this file.
 
 Present the load summary (milestones, must-run count, wall-clock estimate, authorization scope confirmed).
 
@@ -125,19 +125,17 @@ Track via `/monitor-experiment`; update `EXPERIMENT_TRACKER.md` per run (`status
 
 ### Phase 6: Ablation Auto-Plan (when main results support claims)
 
-If RQ1–RQ2 are `SUPPORTED`: run the one-moving-piece ablation wave planned in `EXPERIMENT_PLAN.md` Phase 3 (disable exactly one component per run on identical targets). Reuse `/ablation-planner` semantics where available.
+If RQ1–RQ2 are `SUPPORTED`: invoke `/sec-ablation-planner` to design the four-axis ablation matrix (component deletability / attacker tier / oracle coverage / target family) from `RESULT_TO_CLAIM.md` + `FINAL_PROPOSAL.md`, then execute the wave under the same one-moving-piece and budget-matching rules.
 
-### Phase 7: Result-to-Claim Routing (`sec-result-to-claim` table)
+### Phase 7: Result-to-Claim Routing — invoke `/sec-result-to-claim`
 
-Write `refine-logs/RESULT_TO_CLAIM.md`:
+Run `/sec-result-to-claim` against `research_contract.md` + `EXPERIMENT_RESULTS.md` to produce `refine-logs/RESULT_TO_CLAIM.md`:
 
-| Core Claim | Required Evidence (from plan) | Observed Evidence | Status | Next Action |
-|---|---|---|---|---|
-| C1 | RQ1 + RQ2 oracle-verified | [numbers] | `claim_supported` / `partial` / `contradicted` | confirm / supplement / pivot |
-
-- `claim_supported` → hand off to `/sec-auto-review-loop`.
+- `claim_supported` → hand off to `/sec-experiment-audit` (pipeline Stage 2.5) then `/sec-auto-review-loop`.
 - `partial` → route to the cheapest missing-evidence experiment (supplement, not reframe).
 - `contradicted` → check for publishable negative finding; otherwise document pivot and stop — never launder a refuted claim into the paper.
+
+Re-run `/sec-result-to-claim` after every supplementary evidence batch or ablation wave — it is a routing step, not a one-time table.
 
 ### Phase 8: Handoff Summary
 

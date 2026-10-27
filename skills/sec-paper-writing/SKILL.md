@@ -36,7 +36,25 @@ Draft and audit a publication-ready security manuscript for: **$ARGUMENTS**
 
 ---
 
-## Big-Four Section Scaffolding (S&P / USENIX Security / CCS / NDSS)
+## Internal Orchestration (W3 Sub-Chain)
+
+`sec-paper-writing` composes rather than replaces ARIS's domain-neutral writing skills. The internal chain:
+
+```text
+NARRATIVE_REPORT.md
+  → outline      (/paper-plan  — reuse generic; constrain with the section scaffold below)
+  → draft        (/paper-write — reuse generic; enforce Iron Rules per section)
+  → figures      (/paper-figure or /paper-illustration /figure-spec — reuse generic;
+                  every figure number traces to FACT_PACK.md)
+  → audits       (/paper-claim-audit + /citation-audit + /integrity-forensics —
+                  reuse generic; PLUS the security audit gate below)
+  → compile      (/paper-compile — reuse generic)
+  → text-layer loop (/sec-paper-improve-loop — optional polish rounds on the draft)
+```
+
+The parts this skill itself owns — and which generic skills cannot supply — are the **security content contracts**: the threat-model chapter, the A3 evaluation section, the oracle/dedup declarations, the fact-pack write-lock, and the venue compliance appendices below. Structural paragraph blueprints may additionally borrow `writing-systems-papers` patterns where they do not conflict with the threat-model-first order.
+
+---
 
 1. **Abstract (5–6 sentences)**:
    - Target system/boundary and why its security property matters;

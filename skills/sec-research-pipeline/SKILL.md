@@ -18,9 +18,11 @@ End-to-end autonomous security research workflow for: **$ARGUMENTS**
 ## Overview
 
 ```
-/sec-idea-discovery → /sec-experiment-bridge → /sec-auto-review-loop → summary → /sec-paper-writing (optional)
-├─ Workflow S1 ──────┤├─ Workflow S1.5 ────────┤├── Workflow S2 ───────┤           ├── W3 ────────────┤
+/sec-idea-discovery → /sec-experiment-bridge → /sec-experiment-audit → /sec-auto-review-loop → summary → /sec-paper-writing (optional)
+├─ Workflow S1 ──────┤├─ Workflow S1.5 ────────┤├─ evidence gate ──────┤├── Workflow S2 ───────┤           ├── W3 ────────────┤
 ```
+
+Supporting skills invoked inside stages (not pipeline stages themselves): `/sec-result-to-claim` (routing, re-run on every new evidence batch), `/sec-ablation-planner` (after claims pass), `/run-experiment`, `/experiment-queue`, `/monitor-experiment`, `/paper-figure`, `/paper-compile`, `/render-html`.
 
 ---
 
@@ -49,13 +51,14 @@ Identical to `/sec-idea-discovery`: resolve `AUTO_PROCEED` once, keep for the wh
 Same helper-resolution pattern as `/sec-idea-discovery` (`run_state.py`, `watchdog.py`, `iteration_log.py` via manifest or `tools/`). Stage list for `run_state start`:
 
 ```text
-sec-idea-discovery,sec-experiment-bridge,sec-auto-review-loop,summary,sec-paper-writing
+sec-idea-discovery,sec-experiment-bridge,sec-experiment-audit,sec-auto-review-loop,summary,sec-paper-writing
 ```
 
 | Stage | Terminal record |
 |---|---|
 | `sec-idea-discovery` | its internal evidence gate `PASS` + review receipts → accepted/provisional per family |
 | `sec-experiment-bridge` | deterministic job/result completion → `accepted` (blocked runs record evidence, not success) |
+| `sec-experiment-audit` | `AUDIT_PASS` verdict with trace → `accepted`; `AUDIT_FAIL` keeps the stage open |
 | `sec-auto-review-loop` | positive STOP with all hard gates green: same-family → `mark-provisional`; cross-family → `accept` |
 | `summary` | `NARRATIVE_REPORT.md` exists → `accepted` |
 | `sec-paper-writing` | pre-submission audit gate PASS; `skipped` when `AUTO_WRITE=false` |
@@ -98,7 +101,15 @@ AUTO_PROCEED: selected Candidate 1. Continuing to Stage 2.
 
 Implements harness + oracle + dedup + A3 components → security code review → sanity → deploys via `/run-experiment` or `/experiment-queue` → collects oracle-verified results → ablations → `RESULT_TO_CLAIM.md` routing.
 
-**Output:** `refine-logs/EXPERIMENT_RESULTS.md` + updated `EXPERIMENT_TRACKER.md` + `refine-logs/RESULT_TO_CLAIM.md`. Monitor with `/monitor-experiment`. Claims `contradicted` → check publishable negative finding, else stop with documented pivot — do not force a dead claim into Stage 3.
+**Output:** `refine-logs/EXPERIMENT_RESULTS.md` + updated `EXPERIMENT_TRACKER.md` + `refine-logs/RESULT_TO_CLAIM.md`. Monitor with `/monitor-experiment`. Claims `contradicted` → check publishable negative finding, else stop with documented pivot — do not force a dead claim into Stage 3. When main claims pass, `/sec-ablation-planner` designs the four-axis ablation wave (component / attacker-tier / oracle-coverage / target-family).
+
+### Stage 2.5: Experiment Integrity Audit — `/sec-experiment-audit`
+
+```text
+/sec-experiment-audit "refine-logs/EXPERIMENT_RESULTS.md + results/"
+```
+
+Independent fresh-context audit of the **evidence layer** before any result becomes a claim: phantom results, oracle bypass, dedup honesty, statistical protocol, authorization compliance, A3 genuineness. `AUDIT_FAIL` → back to bridge for evidence fixes; authorization violation → stop the pipeline and surface to the user. `AUDIT_PASS` → Stage 3.
 
 ### Stage 3: Auto Review Loop — `/sec-auto-review-loop`
 
@@ -151,6 +162,6 @@ Skip if `AUTO_WRITE=false` — print the manual command instead:
 /sec-paper-writing "NARRATIVE_REPORT.md" — venue: <VENUE>
 ```
 
-If `AUTO_WRITE=true` and `VENUE` set: invoke `/sec-paper-writing` which enforces the Big-Four scaffold, Fact-Pack provenance, A3 section, and Ethics + Open Science appendices, then its own 6-point pre-submission audit gate.
+If `AUTO_WRITE=true` and `VENUE` set: invoke `/sec-paper-writing` which enforces the Big-Four scaffold, Fact-Pack provenance, A3 section, and Ethics + Open Science appendices, then its own 6-point pre-submission audit gate. Optionally follow with `/sec-paper-improve-loop` for 1–2 text-layer hard-gate rounds before submission.
 
 > **Post-submission branches** (out of scope for this pipeline): `/rebuttal`, `/resubmit-pipeline`, `/paper-talk` remain generic ARIS skills — invoke manually when a venue response arrives.

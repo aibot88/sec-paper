@@ -55,9 +55,13 @@ sec-paper/
 │   ├── sec-research-refine/            # Anchored method refinement (Problem + Threat-Model anchors)
 │   ├── sec-experiment-plan/            # Claim→evidence matrix, RQ1-RQ4 incl. mandatory A3, stats protocol
 │   ├── sec-research-refine-pipeline/   # One-shot refine → experiment-plan composition
-│   ├── sec-experiment-bridge/          # S1.5: harness+oracle+dedup+A3 impl → deploy → claims routing
+│   ├── sec-experiment-bridge/          # S1.5: harness+oracle+dedup+A3 impl → deploy → evidence
+│   ├── sec-result-to-claim/            # evidence → claim status routing (rerun after every batch)
+│   ├── sec-ablation-planner/           # 4-axis ablation: component / attacker-tier / oracle / target-family
+│   ├── sec-experiment-audit/           # S2.5: independent evidence-integrity audit (phantom/oracle/dedup)
 │   ├── sec-auto-review-loop/           # S2: hard-gated review→fix→re-review loop (5 security hard gates)
-│   └── sec-paper-writing/              # Big-Four manuscript scaffolding + pre-submission audit gate
+│   ├── sec-paper-writing/              # Big-Four manuscript scaffolding + pre-submission audit gate
+│   └── sec-paper-improve-loop/         # post-draft text-layer hard-gate polish rounds
 ├── references/
 │   ├── web-and-system-threat-models.md       # W1-W6 adversary classes, A1-A3 tiers, capability table
 │   ├── evaluation-and-oracle-discipline.md   # Oracles, deduplication units, Klees et al. CCS'18 rules
@@ -91,10 +95,14 @@ bash ~/script/sec-paper/tools/install_sec_paper.sh --codex
 ### Entry points
 
 ```text
-/sec-research-pipeline "direction"     # END-TO-END: idea → experiments → review → summary → paper (optional)
+/sec-research-pipeline "direction"     # END-TO-END: idea → experiments → audit → review → summary → paper
 /sec-idea-discovery "direction"        # S1: constraints → lit → candidates+pilots → novelty → review → refine+plan
 /sec-experiment-bridge "plan"          # S1.5: implement harness/oracle/A3 → deploy → oracle-verified results
+/sec-experiment-audit "results/"       # S2.5: independent evidence-integrity audit
 /sec-auto-review-loop "artifacts"      # S2: hard-gated review→fix loop until STOP / MAX_ROUNDS
+/sec-result-to-claim "results/"        # evidence → claim routing (standalone or inside bridge)
+/sec-ablation-planner "claims"         # 4-axis ablation design after claims pass
+/sec-paper-improve-loop "paper/"       # post-draft text-layer hard-gate polish
 /sec-research-lit "topic"              # standalone security/spec literature survey
 /sec-idea-creator "direction"          # standalone ideation + oracle pilots
 /sec-novelty-check "claim"             # standalone root-cause novelty audit
