@@ -1,0 +1,27 @@
+MIT License
+
+Copyright (c) 2026 aibot88
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+Acknowledgements & Upstream Lineage:
+- Inspired by ARIS (Auto-claude-code-research-in-sleep) multi-agent research orchestration.
+- Incorporates security/privacy/crypto writing conventions and anti-pattern taxonomy inspired by euzun/security-paper-writing (MIT) and Orchestra-Research/AI-Research-SKILLs (MIT).
+- Incorporates systems-security primitive mapping insights and anti-stitching lessons analyzed from sys-intelligence/ai-writes-a-paper and foundational security evaluation literature (Klees et al., ACM CCS 2018; Güler et al., USENIX Security 2024; Doupé et al., USENIX Security 2012).
