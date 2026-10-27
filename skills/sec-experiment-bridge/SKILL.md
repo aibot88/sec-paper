@@ -8,7 +8,7 @@ argument-hint: "[EXPERIMENT_PLAN.md-or-chosen-idea] [— code review: true] [—
 
 > **Reviewer slots**: resolve per the reviewer contract in `shared-references/reviewer-contract.md`. The Phase 2.5
 > code review is a **fresh-context** reviewer — the implementer never reviews
-> its own harness. Same-family results are `provisional`, never `accepted`.
+> its own harness. AntiGravity/Gemini is mandatory; no Codex self-review fallback.
 
 Implement and deploy experiments from plan: **$ARGUMENTS**
 
@@ -103,27 +103,16 @@ Run the smallest block end-to-end — typically oracle validation on 1–2 targe
 - Verifies environment build, seed-state loading, oracle firing correctly on a known-positive and known-negative case.
 - Up to 3 debug attempts; then `RESCUE_ON_FAILURE` fresh-agent review; then `BLOCKED_ENV` with evidence — never paper over a dead harness.
 
-### Phase 4: Deploy Full Experiments
+### Phase 4: Deploy Full Experiments (owned local lifecycle)
 
-Auto-route by job count:
-- **≤5 jobs** → `/run-experiment` per run.
-- **≥10 jobs or wave dependencies** (e.g., A1→A2→A3 tiers, baseline→ablation waves) → `/experiment-queue` with OOM/crash-safe state and wave gating.
-
-> **Standalone note (no ARIS skills installed):** `/run-experiment`,
-> `/experiment-queue`, and `/monitor-experiment` are host-provided execution
-> primitives. When they are absent, execute the harness commands directly —
-> the **contract** is what matters, not the launcher: (a) each run lands in
-> `results/<run_id>/` with config + target@SHA + oracle verdicts + timing;
-> (b) stateful runs never share a mutable target instance; (c) per-trial
-> seeds recorded; (d) budgets enforced and overruns marked
-> `UNDERPOWERED_OR_BLIND`.
+Use bundled tools/jobs.py for any job count, including 6–9. A queue is an array of immutable job specs; after dependencies define waves. Start/status/wait/cancel and queue --parallel are specified in shared-references/workflow-contract.md. No ARIS Skill is required. Only the local POSIX backend is currently implemented; requested SSH/GPU backends block until an explicit equivalent adapter exists. Never hide an unsupported backend behind local fallback.
 
 **Isolation invariants (security-specific, hard rules):**
 - Never run two stateful scanners against one mutable DB/app instance concurrently — separate containers, namespaces, or DB clones.
 - Reset seed state between trials of stochastic methods; record per-trial seed.
 - Rate-limit any component that can emit requests; log total request budget per run.
 
-Track via `/monitor-experiment`; update `EXPERIMENT_TRACKER.md` per run (`status | raw → deduped | oracle verdicts | wall-clock`).
+Track via jobs.py status/wait; update EXPERIMENT_TRACKER.md per real job ID. Retain config, target revision, oracle outputs, logs, seed and time. Failed jobs use new IDs; interrupted workers require target/orphan inspection rather than automatic retry.
 
 ### Phase 5: Collect & Verify Results
 
@@ -132,13 +121,9 @@ Track via `/monitor-experiment`; update `EXPERIMENT_TRACKER.md` per run (`status
 3. **Statistics protocol check**: stochastic methods must have ≥ the planned trial count; report median + IQR + Mann-Whitney U. Short runs get labeled `existence smoke only`.
 4. Timeout/infra failures → `UNDERPOWERED_OR_BLIND` or `BLOCKED_ETHICS_OR_ENV` with partial artifacts preserved.
 
-### Phase 6: Ablation Auto-Plan (when main results support claims)
+### Phase 6: Audit Main Evidence, Then Route Claims
 
-If RQ1–RQ2 are `SUPPORTED`: invoke `/sec-ablation-planner` to design the four-axis ablation matrix (component deletability / attacker tier / oracle coverage / target family) from `RESULT_TO_CLAIM.md` + `FINAL_PROPOSAL.md`, then execute the wave under the same one-moving-piece and budget-matching rules.
-
-### Phase 7: Result-to-Claim Routing — invoke `/sec-result-to-claim`
-
-Run `/sec-result-to-claim` against `research_contract.md` + `EXPERIMENT_RESULTS.md` to produce `refine-logs/RESULT_TO_CLAIM.md`:
+Invoke sec-experiment-audit on the collected main-run evidence. A positive real Gemini receipt is required before sec-result-to-claim can classify admissible evidence. Then produce refine-logs/RESULT_TO_CLAIM.md from the research contract and audited results; the file exists BEFORE ablation planning:
 
 - `claim_supported` → hand off to `/sec-experiment-audit` (pipeline Stage 2.5) then `/sec-auto-review-loop`.
 - `partial` → route to the cheapest missing-evidence experiment (supplement, not reframe).
@@ -146,6 +131,10 @@ Run `/sec-result-to-claim` against `research_contract.md` + `EXPERIMENT_RESULTS.
 
 Re-run `/sec-result-to-claim` after every supplementary evidence batch or ablation wave — it is a routing step, not a one-time table.
 
+### Phase 7: Ablation Wave, Re-Audit and Re-Route
+
+For supported/partial main claims, sec-ablation-planner reads the now-existing RESULT_TO_CLAIM.md and FINAL_PROPOSAL.md to design applicable component/attacker/oracle/target-family variations. Execute via jobs.py. New evidence invalidates old audit/claim acceptance: run sec-experiment-audit and sec-result-to-claim again. Never reuse an initial AUDIT_PASS for modified results. Stage 2.5 may reuse the latest unchanged receipt, but not a stale one.
+
 ### Phase 8: Handoff Summary
 
-Report: runs executed, oracle-verified results per RQ, A3 outcome if applicable, claims status, artifacts paths, and the exact command that resumes monitoring. Hand to `/sec-auto-review-loop` only when `EXPERIMENT_RESULTS.md` and `RESULT_TO_CLAIM.md` both exist.
+Report real jobs, oracle-verified results, A3 outcome, claim status, artifacts and jobs.py resume commands. Handoff requires nonempty results/claims and a fresh evidence-audit receipt, not merely file existence. Read shared-references/workflow-contract.md for the full independent state and review protocol.

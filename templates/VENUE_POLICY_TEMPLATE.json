@@ -1,0 +1,10 @@
+{
+  "venue": "REPLACE_WITH_VENUE",
+  "cycle": "REPLACE_WITH_TARGET_CYCLE",
+  "official_url": "https://REPLACE_WITH_OFFICIAL_CFP",
+  "retrieved_at": "YYYY-MM-DD",
+  "saved_cfp": "paper/official-cfp.md",
+  "max_total_pages": 0,
+  "required_sections": ["Ethical Considerations", "Open Science"],
+  "forbidden_identifiers": []
+}

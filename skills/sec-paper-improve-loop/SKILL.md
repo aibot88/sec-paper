@@ -56,7 +56,7 @@ Executor applies fixes to `.tex` only — no new experiments (evidence gaps rout
 
 ### Step 3 — Recompile & Re-Review
 
-Compile via `/paper-compile` (or direct `latexmk`). Fix errors. Re-review only if the review found hard-gate reds or score < 8 — a clean round ends the loop early.
+Compile with latexmk; fix errors. Every source change requires re-review of the changed final snapshot, even when an earlier round scored >=8. A clean unchanged round may end polishing, but it is not submission acceptance. After the last edit invoke sec-paper-audit for the independent final claim/citation/adversarial/proof/artifact audits and the owned PDF/submission verifiers. Never reuse an audit from before polishing.
 
 ### Output
 

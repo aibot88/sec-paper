@@ -8,6 +8,8 @@ argument-hint: "[RESULT_TO_CLAIM.md-or-FINAL_PROPOSAL.md] [— max runs: N]"
 
 Design the ablation study for: **$ARGUMENTS**
 
+Follow shared-references/workflow-contract.md. Gemini reviews the ablation matrix against audited claim status; Codex checks feasibility and executes. After the wave, re-audit evidence and re-route claims. Use tools/jobs.py queue/status/wait (owned local backend), never require generic ARIS run/queue Skills.
+
 ---
 
 ## When to Run
@@ -45,7 +47,7 @@ Hold the method constant, vary the target corpus: framework family, version era,
 | ABL-1 | Component | -state snapshot | all else | reach of deep states drops ≥X% | state-diff, root-cause | identical |
 
 3. **Rules**: one moving piece per run; identical seed state/auth/budget across variants; stochastic variants keep the planned trial count; each run names its hypothesis *before* execution so the result is interpretable either way.
-4. **Execution**: hand the matrix to `/run-experiment` or `/experiment-queue` (wave-gated). Results fold back into `EXPERIMENT_RESULTS.md` (RQ4) and re-run `sec-result-to-claim` if any ablation contradicts a claim.
+4. **Execution**: run the matrix via bundled tools/jobs.py queue with wave dependencies. Fold results into EXPERIMENT_RESULTS.md, re-audit the new evidence and rerun sec-result-to-claim for every completed wave, not only surprising results.
 
 ## Output
 

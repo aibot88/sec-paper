@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from evidence import snapshot
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,7 +31,7 @@ REQUIRED_PHASES = (
 # heading and a ``done`` self-report therefore cannot satisfy their evidence
 # obligation: the run state must contain the receipt written by ``accept`` or
 # ``mark-provisional``.
-REVIEW_REQUIRED_PHASES = frozenset({"sec-novelty-check", "sec-research-review"})
+REVIEW_REQUIRED_PHASES = frozenset({"sec-idea-creator", "sec-novelty-check", "sec-research-review", "sec-research-refine-pipeline"})
 START_MARKER = "<!-- ARIS_IDEA_DISCOVERY_EVIDENCE_GATE:START -->"
 END_MARKER = "<!-- ARIS_IDEA_DISCOVERY_EVIDENCE_GATE:END -->"
 
@@ -67,15 +68,25 @@ def _heading_slug(line: str) -> str | None:
 def _section_has_content(path: Path, anchor: str) -> tuple[bool, bool]:
     """Return whether the first matching section exists and has a non-empty body."""
     found = False
+    level = 0
+    fence = False
     for line in path.read_text(encoding="utf-8").splitlines():
+        if line.lstrip().startswith("```"):
+            fence = not fence
+            continue
+        if fence:
+            continue
         heading = _heading_slug(line)
         if not found:
             if heading == anchor:
                 found = True
+                level = len(line) - len(line.lstrip("#"))
             continue
         if heading is not None:
-            return True, False
-        if line.strip():
+            if len(line) - len(line.lstrip("#")) <= level:
+                return True, False
+            continue
+        if line.strip() and not line.strip().startswith("<!--"):
             return True, True
     return found, False
 
@@ -159,6 +170,16 @@ def evaluate(
             if provenance_reason is not None:
                 reasons.append(provenance_reason)
                 continue
+            try:
+                receipt = run_state.validate_receipt(project_root, phase["verdict_id"], name, state["run_id"])
+                expected = snapshot(project_root, [phase["artifact"]])
+                if name == "sec-research-refine-pipeline":
+                    expected.update(snapshot(project_root, [f"refine-logs/{n}" for n in ("EXPERIMENT_PLAN.md", "EXPERIMENT_TRACKER.md", "REVIEW_SUMMARY.md")]))
+                if any(receipt["snapshot"].get(k) != v for k, v in expected.items()):
+                    raise ValueError("review did not cover the phase artifact/section")
+            except (ValueError, OSError, KeyError, TypeError) as exc:
+                reasons.append(f"{name} invalid review receipt ({exc})")
+                continue
         artifact = phase.get("artifact")
         if not artifact:
             reasons.append(f"{name} evidence missing (artifact not recorded)")
@@ -171,6 +192,8 @@ def evaluate(
         if not artifact_path.is_file():
             reasons.append(f"{name} evidence missing (artifact absent: {artifact})")
             continue
+        if artifact_path.stat().st_size == 0:
+            reasons.append(f"{name} evidence missing (empty artifact: {artifact})")
         if anchor:
             section_exists, section_has_content = _section_has_content(
                 artifact_path, anchor
@@ -180,6 +203,11 @@ def evaluate(
             elif not section_has_content:
                 reasons.append(f"{name} evidence missing (section empty: #{anchor})")
 
+    if "sec-research-refine-pipeline" in required_phases:
+        for name in ("FINAL_PROPOSAL.md", "EXPERIMENT_PLAN.md", "EXPERIMENT_TRACKER.md", "REVIEW_SUMMARY.md"):
+            path = project_root / "refine-logs" / name
+            if not path.is_file() or not path.stat().st_size:
+                reasons.append(f"refinement output missing or empty: {name}")
     return GateResult("PASS" if not reasons else "BLOCKED", tuple(reasons))
 
 
@@ -267,6 +295,8 @@ def main() -> int:
 
     required = tuple(p.strip() for p in args.phases.split(",") if p.strip())
     review = frozenset(p.strip() for p in args.review_phases.split(",") if p.strip())
+    if not required or not review.issubset(required) or not REVIEW_REQUIRED_PHASES.intersection(required).issubset(review):
+        parser.error("nonempty phase list and all required review-bearing stages must be preserved")
 
     try:
         result = run(args.root, args.run_id, args.report, required, review)

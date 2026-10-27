@@ -50,6 +50,29 @@
 
 ## 独立运行说明（不依赖 ARIS）
 
+### 当前独立版的运行与验收入口
+
+**Codex 生成/实现/执行，AntiGravity/Gemini 审稿，禁止回退 Codex 自审。**
+安装器的 --project 会初始化项目配置和 .aris/sec-paper.json；旧安装可运行：
+
+```bash
+python3 /path/to/sec-paper/tools/project.py init --project /path/to/project
+python3 /path/to/sec-paper/tools/project.py doctor --project /path/to/project --live
+python3 -m unittest discover -s tests -v
+```
+
+完整契约见 [workflow-contract](shared-references/workflow-contract.md)。
+本机作业生命周期由 tools/jobs.py 的 start/status/wait/cancel/queue 实现；
+真实 Gemini 调用、trace 与输入版本绑定由 tools/review.py 实现。
+新的 sec-paper-audit 包含五项独立终审（主张↔原始数据、引用语境、最强拒稿论证、
+适用证明或有理由的 N/A、匿名复现包），再执行 paper_check.py 和 submission_gate.py。
+它们是投稿必需项，**不再依赖 ARIS 通用审计 Skill，也不能以六项人工清单替代**。
+
+只实现并验证了 local POSIX 作业后端；SSH/GPU 后端需明确适配，不支持就阻断。
+回归测试中的模型回执和实验是显式测试夹具，不代表真实研究或论文审稿通过。
+当前会场官方 CFP、真实实验、TeX/PDF 工具和真实终审仍是投稿验收前提；
+最终点击投稿属于单独的人类确认操作。许可证及来源见 THIRD_PARTY_NOTICES.md。
+
 `sec-paper` 是**自包含**项目：`tools/` 下 vendor 了运行所需的全部确定性工具——`run_state.py`（断点续跑状态）、`idea_discovery_gate.py`（已参数化为 `sec-*` 阶段名，支持 `--phases`/`--review-phases` 覆盖）、`reviewer_route.py`（审稿后端解析）、`threat_scan.py`、`research_wiki.py`、`antigravity-exec/server.py`（本机 `agy` 审稿桥）。
 
 审稿后端配置（每个项目一次，Codex 执行 × AntiGravity/Gemini 审稿 → 跨家族 `accept` 回执）：
@@ -58,7 +81,7 @@
 cp /Users/aibot/script/sec-paper/.aris/reviewer.example.json <项目>/.aris/reviewer.json
 ```
 
-可选集成（存在即用，缺失自动降级）：ARIS 的 `/run-experiment` `/experiment-queue` `/monitor-experiment`（执行原语——sec-paper 内嵌等价契约）、`/paper-plan` `/paper-write` `/paper-figure` `/paper-compile` 等写作侧通用件（缺失时按内置骨架与 `latexmk` 兜底）、`/render-html`、`research-wiki`。
+可选集成仅包括显示/知识连接器和通用辅助工具。核心运行、监控、队列、真实审稿与最终审计已有本仓库实现，不再以“宿主可选组件”代替。
 
 ## 一键安装与使用（不污染上游 ARIS 仓库）
 

@@ -9,6 +9,11 @@ __pycache__/
 # Runtime state (per-project, do not commit)
 .aris/runs/
 .aris/traces/
+.aris/sec-paper.json
+.aris/context.json
+.aris/jobs/
+.aris/submission.json
+.aris/submission-gate.json
 research-wiki/
 idea-stage/
 refine-logs/

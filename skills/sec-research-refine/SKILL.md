@@ -127,7 +127,7 @@ Before rewriting:
 
 ### Phase 4: Same-Session Re-Evaluation
 
-Query the **same** reviewer session (`agent_id` persisted) on the revised proposal. The reviewer checks whether its prior objections were actually fixed — not restated. Repeat Phases 3–4 until `OVERALL >= SCORE_THRESHOLD` or `MAX_ROUNDS`.
+Warm repair verification may continue the same Gemini session using review.py --continue-from. This is not cold review. Repeat until the score/objections warrant stopping or MAX_ROUNDS. Before validated handoff obtain a NEW-session Gemini acceptance of the final proposal (and the composed pipeline's final experiment plan); do not use a warm score as final acceptance. MAX_ROUNDS/REVISE produces an honest draft status, never PASS.
 
 ### Phase 5: Persist & Hand Off
 

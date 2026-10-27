@@ -8,6 +8,8 @@ argument-hint: "[RESULT_TO_CLAIM.md-or-results-path]"
 
 Route experimental evidence to claim status for: **$ARGUMENTS**
 
+Read shared-references/workflow-contract.md. Codex assembles raw evidence and the table; a fresh AntiGravity/Gemini review via tools/review.py adjudicates the claim statuses against the research contract and actual logs. Save the positive/negative receipt and raw trace; only current AUDIT_PASS evidence is admissible. No self-generated claims table counts as independent adjudication. Revalidate after new data or scope changes.
+
 ---
 
 ## Inputs
@@ -15,7 +17,7 @@ Route experimental evidence to claim status for: **$ARGUMENTS**
 - `idea-stage/docs/research_contract.md` — the ≤2 falsifiable core claims + frozen anchors (created by `sec-experiment-bridge` Phase 1).
 - `refine-logs/EXPERIMENT_PLAN.md` — the claim→evidence matrix (what each claim *requires*).
 - `refine-logs/EXPERIMENT_RESULTS.md` + `results/` — what was *observed*.
-- `review-stage/EXPERIMENT_AUDIT.md` — if present, only `AUDIT_PASS` evidence is admissible.
+- review-stage/EXPERIMENT_AUDIT.md plus its current version-bound Gemini receipt — required, not optional; only audited evidence is admissible.
 
 ---
 

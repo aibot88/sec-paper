@@ -1,5 +1,17 @@
 # Antigravity CLI → MCP
 
+## sec-paper standalone entry point
+
+This copy is bundled in sec-paper. Prefer `python3 tools/review.py probe|run
+--project PROJECT`: it calls this bridge directly, saves raw traces/receipts,
+and needs no MCP registration. Codex executes; only Gemini reviews. Optional
+Codex MCP registration uses this repository's real path:
+`codex mcp add antigravity -- python3 /absolute/path/to/sec-paper/tools/antigravity-exec/server.py`.
+The ARIS integration and validation notes below are historical upstream notes,
+not current sec-paper runtime dependencies. Do not invoke Claude Code here.
+Install the bundled review-only agent in `~/.gemini/config/agents/` as described
+below; do not override the user's interactive default agent.
+
 使用已有 `agy` 登录，把 Gemini 3.8 Flash 接为独立 MCP。沿用同仓库 `codex-exec` / `grok-exec` 的 NDJSON、进度、取消和会话保存设计，Python 3.9+，无需第三方库。
 
 默认模型 `gemini-3.8-flash-high`，effort `high`。提供 `antigravity` 和 `antigravity-reply`，作为独立工具使用，不修改 ARIS skills 的 reviewer 路由。
@@ -13,16 +25,12 @@
 3. 注册 MCP，绝对路径替换为自己的安装位置：
 
 ```bash
-codex mcp add antigravity --env AGY_BIN=/absolute/path/to/agy -- python3 /absolute/path/to/aris/mcp-servers/antigravity-exec/server.py
+codex mcp add antigravity --env AGY_BIN=/absolute/path/to/agy -- python3 /absolute/path/to/sec-paper/tools/antigravity-exec/server.py
 ```
 
 在 Codex `config.toml` 的 `[mcp_servers.antigravity]` 中设置 `tool_timeout_sec = 3660`。若本机网络需要代理，在该服务的 `env` 中显式配置实际可达的 `http_proxy` / `https_proxy`；不要依赖 GUI 启动时继承终端环境。
 
-Claude Code 可另行注册：
-
-```bash
-claude mcp add antigravity -s user -- python3 /absolute/path/to/aris/mcp-servers/antigravity-exec/server.py
-```
+本项目不使用 Claude Code CLI。
 
 重启对应客户端后使用新工具。常驻 MCP 与 shell 内启动的独立探测具有不同的宿主权限；受限 shell 不能写 CLI 状态目录或连接代理，不代表常驻服务也失败，应使用宿主的正常审批流程处理。
 
@@ -71,9 +79,9 @@ claude mcp add antigravity -s user -- python3 /absolute/path/to/aris/mcp-servers
 离线协议测试：
 
 ```bash
-python3 -m unittest discover -s tests -p 'test_antigravity_exec_bridge.py' -v
+python3 -m unittest discover -s tests -p 'test_bridge.py' -v
 ```
 
-8项用例覆盖协议、长输入、跨进程续接、错误终态、元数据缺失、取消和超时。Ruff、格式与 ty 检查通过。
+sec-paper 自带 8 项离线桥接测试（fake CLI），覆盖续接、身份、错误/缺失终态、空响应、长 stdin 输入和超时。上游的跨进程/取消及静态检查记录是历史记录，不冒充当前本地测试结果。
 
 接口依据：[Google headless 文档](https://www.antigravity.google/docs/cli/headless/)、[自定义 agent](https://www.antigravity.google/docs/subagents)、[Codex MCP 配置](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)。

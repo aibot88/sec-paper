@@ -30,7 +30,7 @@ Draft and audit a publication-ready security manuscript for: **$ARGUMENTS**
 4. **No raw crash/alert counts masquerading as vulnerability counts.** Always report the ground-truth oracle and deduplication unit (independent root cause / minimal patch / broken invariant).
 5. **Pin every CVE and code artifact.** Cite vulnerabilities as `CVE-YYYY-NNNNN` (verified via NVD) and public PoC/fix commits with full 40-character Git SHAs.
 6. **Strict double-blind anonymity.** Self-citations in third person; strip author names, grants, non-anonymized GitHub URLs, and identifying hostnames from text, figures, and scripts.
-7. **Mandatory Ethics & Responsible Disclosure before submission.** Follow the Menlo Report stakeholder analysis and document the 90-day coordinated disclosure timeline (or justify local-only testing).
+7. **Mandatory Ethics & Responsible Disclosure before submission.** Follow stakeholder analysis and the actual venue/vendor disclosure policy; record dates and any embargo. A 90-day window is an example, not a universal requirement. Local-only work still documents stakeholders/risks. No CVE assignment is required for a legitimate unassigned finding; record its real advisory status.
 8. **Mandatory Open Science / Artifact Readiness.** For USENIX Security ('26 policy) and peer venues, prepare anonymized artifact links and per-table/figure reproduction scripts (`./reproduce-table-1.sh`) at submission time, not after acceptance.
 9. **Zero reviewer-simulator leakage.** Never paste internal review prompts, scores, or simulated rebuttal prose into the manuscript body.
 
@@ -38,24 +38,20 @@ Draft and audit a publication-ready security manuscript for: **$ARGUMENTS**
 
 ## Internal Orchestration (W3 Sub-Chain)
 
-`sec-paper-writing` composes rather than replaces ARIS's domain-neutral writing skills. The internal chain:
+This is a standalone W3 workflow. Codex performs the following stages directly; no ARIS Skills are required. Read shared-references/workflow-contract.md and preserve its actual-Gemini/freshness rules:
 
 ```text
-NARRATIVE_REPORT.md
-  → outline      (/paper-plan  — optional host skill; fallback: build the outline
-                  directly from the section scaffold below)
-  → draft        (/paper-write — optional host skill; fallback: draft sections
-                  inline against the scaffold + Iron Rules)
-  → figures      (/paper-figure /figure-spec — optional host skills; fallback:
-                  plain matplotlib/tikz; every figure number traces to FACT_PACK.md)
-  → audits       (/paper-claim-audit /citation-audit /integrity-forensics —
-                  optional host skills; the 6-point security audit gate below is
-                  MANDATORY and runs regardless)
-  → compile      (/paper-compile — optional host skill; fallback: latexmk -pdf)
-  → text-layer loop (/sec-paper-improve-loop — optional polish rounds on the draft)
+NARRATIVE_REPORT + FACT_PACK + final claim/evidence receipts
+  -> cycle-specific official CFP + venue policy capture
+  -> PAPER_PLAN with claim->figure/table->evidence mapping
+  -> figures (matplotlib/TikZ/SVG, all numbers from verified evidence)
+  -> LaTeX sources + BibTeX + explicit output inventory
+  -> latexmk compilation and text-layer polish
+  -> sec-paper-audit: five mandatory independent fresh Gemini audits
+  -> paper_check.py + submission_gate.py on the FINAL unchanged bundle
 ```
 
-The parts this skill itself owns — and which no external skill supplies — are the **security content contracts**: the threat-model chapter, the A3 evaluation section, the oracle/dedup declarations, the fact-pack write-lock, and the venue compliance appendices below. Structural paragraph blueprints may borrow `writing-systems-papers` patterns where they do not conflict with the threat-model-first order.
+Deliver paper/main.tex, main.pdf, .bib, figures and reproducible code/data in artifact/, plus final audit receipts, paper/.aris/pdf-check.json and .aris/submission-gate.json. Missing TeX/PDF tooling blocks submission assurance. No TBD, invented citation or unsupported number may remain in the final bundle. A general-purpose host helper may assist, but cannot replace the mandatory independent audits or owned verifier.
 
 ---
 
@@ -97,7 +93,7 @@ The parts this skill itself owns — and which no external skill supplies — ar
    - Grouped by mechanism and assumption boundary (never a laundry list of "Paper X did Y").
 10. **9. Conclusion**.
 11. **Required Appendices (Venue-Specific)**:
-    - **USENIX Security**: `Ethical Considerations` (up to 1 page, stakeholder analysis per Menlo Report + disclosure timeline) and `Open Science` (up to 1 page, anonymized artifact inventory & reproduction instructions) immediately after main body, before references.
+     - **USENIX Security**: Ethical Considerations and Open Science as required by the target cycle; retrieve current official CFP for names, placement and page rules instead of applying the 2026 example blindly.
     - **IEEE S&P / ACM CCS / NDSS**: integrate Ethics & Data/Artifact Availability per current CFP placement rules.
 
 ---
@@ -105,6 +101,8 @@ The parts this skill itself owns — and which no external skill supplies — ar
 ## Pre-Submission Audit Gate
 
 Before compiling the final PDF, run this 6-point check against `FACT_PACK.md` and the forbidden-claim source (`idea-stage/FORBIDDEN_CLAIMS.md` if materialized, else the `Forbidden-Claim & Ethics Pre-Flight Seed` section of `IDEA_REPORT.md` + `research_contract.md`):
+
+This checklist is a SECURITY SUPPLEMENT, not submission acceptance. After the final compile/polish, sec-paper-audit must independently check raw-result-to-paper claims, citation existence/metadata/context, the strongest rejection case, applicable proofs (or justified N/A), and clean anonymous artifact reproduction. All five fresh Gemini receipts must cover the current final inputs, then paper_check.py and submission_gate.py must PASS. Any later edit reopens affected audits. A failed MAX_ROUNDS cannot be relabeled READY.
 
 - [ ] **Numeral Parity**: Every number in Abstract, Intro, Tables, and Conclusion matches `FACT_PACK.md` verbatim.
 - [ ] **Forbidden-Claim Clean**: Zero occurrences of banned overclaims (`novel` without citation proof, `0% FP` without scope bound, `provably secure` without formal theorem + assumption list).

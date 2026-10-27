@@ -54,6 +54,32 @@ except ImportError:  # package import: ``from tools import run_state``
     from tools.provenance import model_family
 
 try:
+    from evidence import validate_receipt, local, snapshot
+except ImportError:
+    from tools.evidence import validate_receipt, local, snapshot
+
+EXECUTION_PHASES = {"sec-research-lit", "sec-experiment-bridge", "summary"}
+
+
+def phase_terminal(root, state, phase):
+    if phase["status"] == "skipped":
+        return phase["phase"] == "sec-paper-writing" and state.get("policy", {}).get("auto_write") is False
+    if phase.get("kind") == "execution" and phase["status"] == "done":
+        artifact = phase.get("artifact")
+        try:
+            path = local(root, artifact.split("#", 1)[0])
+            return path.is_file() and path.stat().st_size > 0
+        except (OSError, ValueError, AttributeError):
+            return False
+    if phase["status"] != "accepted":
+        return False
+    try:
+        validate_receipt(root, phase["verdict_id"], phase["phase"], state["run_id"])
+        return True
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+try:
     import fcntl  # POSIX
 except ImportError:  # pragma: no cover - Windows
     fcntl = None  # type: ignore
@@ -135,8 +161,9 @@ def _save(root: str, run_id: str, state: dict) -> None:
             raise
 
 
-def start_run(root: str, run_id: str, phases: list[str], executor: Optional[str] = "claude",
-              provisional_advances: bool = False) -> dict:
+def start_run(root: str, run_id: str, phases: list[str], executor: Optional[str] = "codex-gpt-6.1-sol",
+              provisional_advances: bool = False, parent_run_id: Optional[str] = None,
+              auto_write: bool = False) -> dict:
     """Create a run with ordered phases, all `pending` (idempotent: won't clobber).
 
     ``claude`` is the historical mainline executor default. Codex-native callers
@@ -146,18 +173,30 @@ def start_run(root: str, run_id: str, phases: list[str], executor: Optional[str]
     provisional verdict close a phase for RESUME purposes (Codex-native mirror:
     true; mainline default: false — only cross-family acceptance advances).
     """
+    if model_family(executor) != "openai":
+        raise ValueError("sec-paper executor must be Codex/OpenAI")
+    if provisional_advances:
+        raise ValueError("sec-paper requires Gemini review; provisional advances are disabled")
+    if not phases or len(set(phases)) != len(phases):
+        raise ValueError("phase list must be nonempty and unique")
+    if parent_run_id == run_id:
+        raise ValueError("parent and child run IDs must differ")
     with _lock(root, run_id):
         if _run_path(root, run_id).exists():
-            return _load(root, run_id)
+            existing = _load(root, run_id)
+            if [p["phase"] for p in existing["phases"]] != phases or existing.get("parent_run_id") != parent_run_id or existing.get("executor_model") != executor or existing.get("policy", {}).get("auto_write") != auto_write:
+                raise ValueError("run_id already belongs to a different workflow; use a child run_id")
+            return existing
         state = {
             "run_id": run_id,
+            "parent_run_id": parent_run_id,
             "executor_model": executor,
             "executor_family": model_family(executor) if executor else None,
-            "policy": {"provisional_advances": bool(provisional_advances)},
+            "policy": {"provisional_advances": False, "auto_write": bool(auto_write)},
             "created": _now(),
             "updated": _now(),
             "gates": {},
-            "phases": [{"phase": ph, "status": "pending", "artifact": None,
+            "phases": [{"phase": ph, "kind": "execution" if ph in EXECUTION_PHASES else "review", "status": "pending", "artifact": None,
                         "verdict_id": None, "reviewer": None,
                         "reviewer_family": None, "review_independence": None,
                         "acceptance_status": None, "executor_model": executor,
@@ -218,6 +257,15 @@ def set_status(root: str, run_id: str, phase: str, status: str, artifact: Option
     with _lock(root, run_id):
         state = _load(root, run_id)
         ph = _find_phase(state, phase)
+        if status == "skipped" and not (phase == "sec-paper-writing" and state.get("policy", {}).get("auto_write") is False):
+            raise ValueError("only disabled optional paper writing may be skipped")
+        # Re-execution invalidates this review and every downstream acceptance.
+        if status in {"pending", "running", "failed"}:
+            start = state["phases"].index(ph)
+            for item in state["phases"][start:]:
+                if item["status"] in {"accepted", "provisional"}:
+                    item["status"] = "pending"
+                    item["verdict_id"] = item["reviewer"] = None
         ph["status"] = status
         if artifact is not None:
             ph["artifact"] = artifact
@@ -243,6 +291,18 @@ def accept(root: str, run_id: str, phase: str, verdict_id: str, reviewer: str, f
     with _lock(root, run_id):
         state = _load(root, run_id)
         ph = _find_phase(state, phase)
+        if force:
+            raise ValueError("force acceptance is disabled")
+        receipt = validate_receipt(root, verdict_id, phase, run_id)
+        if receipt.get("topology") != "fresh":
+            raise ValueError("final phase acceptance requires a fresh Gemini session")
+        if not ph.get("artifact"):
+            raise ValueError("reviewed phase artifact is required")
+        expected = snapshot(root, [ph["artifact"]])
+        if any(receipt["snapshot"].get(k) != v for k, v in expected.items()):
+            raise ValueError("review receipt does not cover this phase artifact")
+        if receipt["reviewer_model"] != reviewer or receipt["executor_model"] != state["executor_model"]:
+            raise ValueError("receipt model identities differ from run")
         if not force and ph["status"] not in ("done", "accepted", "provisional"):
             raise ValueError(
                 f"phase {phase!r} is {ph['status']!r}, not 'done' — cannot accept a phase that "
@@ -276,55 +336,22 @@ def accept(root: str, run_id: str, phase: str, verdict_id: str, reviewer: str, f
         ph["executor_model"] = executor_model
         ph["executor_family"] = executor_family
         ph["updated"] = _now()
+        log = Path(root) / ".aris" / "runs" / f"{run_id}.acceptance.jsonl"
+        with log.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps({"phase": phase, "run_id": run_id, "receipt": verdict_id, "thread_id": receipt["thread_id"], "snapshot": receipt["snapshot"], "at": _now()}) + "\n")
+        if phase == "sec-auto-review-loop":
+            directory = Path(root) / "review-stage"
+            directory.mkdir(exist_ok=True)
+            with (directory / "ACQUITTAL_LOG.jsonl").open("a") as handle:
+                handle.write(json.dumps({"run_id":run_id,"phase":phase,"receipt":verdict_id,"decision":receipt["verdict"]["decision"],"accepted":True})+"\n")
         _save(root, run_id, state)
         return state
 
 
 def mark_provisional(root: str, run_id: str, phase: str, verdict_id: str,
-                     reviewer: str, executor: Optional[str] = None) -> dict:
-    """Record a same-family review as terminal-but-not-accepted progress.
-
-    The executor defaults to the model recorded by :func:`start_run`. Both
-    model names must resolve to the same non-deterministic family. This lets a
-    Codex-only workflow resume past a reviewed phase while keeping the absence
-    of cross-family acceptance machine-readable.
-    """
-    if not verdict_id or not reviewer:
-        raise ValueError(
-            "mark_provisional requires a non-empty verdict_id AND reviewer.")
-    with _lock(root, run_id):
-        state = _load(root, run_id)
-        ph = _find_phase(state, phase)
-        if ph["status"] not in ("done", "provisional"):
-            raise ValueError(
-                f"phase {phase!r} is {ph['status']!r}, not 'done' — cannot mark a "
-                "phase provisional before execution completes.")
-        executor_model = executor or ph.get("executor_model") or state.get("executor_model")
-        if not executor_model:
-            raise ValueError(
-                "mark_provisional requires an executor model, either from start_run "
-                "or the executor argument.")
-        executor_family = model_family(executor_model)
-        reviewer_family = model_family(reviewer)
-        if executor_family == "unknown" or reviewer_family == "unknown":
-            raise ValueError(
-                f"cannot classify provisional executor/reviewer families: "
-                f"{executor_model!r}={executor_family}, {reviewer!r}={reviewer_family}")
-        if reviewer_family == "deterministic" or executor_family != reviewer_family:
-            raise ValueError(
-                "mark_provisional is only for same-family model review; use accept "
-                "for cross-family or deterministic verdicts.")
-        ph["status"] = "provisional"
-        ph["verdict_id"] = verdict_id
-        ph["reviewer"] = reviewer
-        ph["reviewer_family"] = reviewer_family
-        ph["review_independence"] = "same-family"
-        ph["acceptance_status"] = "provisional"
-        ph["executor_model"] = executor_model
-        ph["executor_family"] = executor_family
-        ph["updated"] = _now()
-        _save(root, run_id, state)
-        return state
+                      reviewer: str, executor: Optional[str] = None) -> dict:
+    """Compatibility entry point that explicitly rejects same-family review."""
+    raise ValueError("sec-paper does not accept same-family review; use AntiGravity/Gemini")
 
 
 def resume_point(root: str, run_id: str) -> Optional[dict]:
@@ -336,12 +363,12 @@ def resume_point(root: str, run_id: str) -> Optional[dict]:
     """
     state = _load(root, run_id)
     for ph in state["phases"]:
-        if ph["status"] not in _terminal_statuses(state):
+        if not phase_terminal(root, state, ph):
             return ph
     return None
 
 
-def _print_status(state: dict) -> None:
+def _print_status(state: dict, root: str = ".") -> None:
     print(f"run {state['run_id']}  (updated {state.get('updated', '?')})")
     glyph = {"pending": "·", "running": "▶", "done": "✓(unaccepted)",
              "failed": "✗", "accepted": "✅", "provisional": "⚠ provisional",
@@ -353,14 +380,14 @@ def _print_status(state: dict) -> None:
         elif ph["artifact"]:
             line += f"  → {ph['artifact']}"
         print(line)
-    rp = next((p for p in state["phases"] if p["status"] not in _terminal_statuses(state)), None)
-    print(f"  resume → {rp['phase'] if rp else 'COMPLETE (all phases terminal; provisional is not accepted)'}")
+    rp = next((p for p in state["phases"] if not phase_terminal(root, state, p)), None)
+    print(f"  resume → {rp['phase'] if rp else 'COMPLETE'}")
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="ARIS resumable run-state (done vs accepted).")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    s = sub.add_parser("start"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("--phases", required=True, help="comma-separated phase names"); s.add_argument("--executor", default="claude"); s.add_argument("--provisional-advances", action="store_true", help="per-run policy: let a same-family provisional verdict close a phase for resume (Codex-native mirror only; mainline default keeps cross-family-only advance)")
+    s = sub.add_parser("start"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("--phases", required=True); s.add_argument("--executor", default="codex-gpt-6.1-sol"); s.add_argument("--provisional-advances", action="store_true", help="deprecated; rejected in sec-paper"); s.add_argument("--parent-run-id"); s.add_argument("--auto-write", action="store_true")
     s = sub.add_parser("set"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("phase"); s.add_argument("status", choices=sorted(EXECUTOR_STATUSES)); s.add_argument("--artifact")
     s = sub.add_parser("accept"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("phase"); s.add_argument("--verdict-id", required=True); s.add_argument("--reviewer", required=True); s.add_argument("--force", action="store_true")
     s = sub.add_parser("mark-provisional"); s.add_argument("root"); s.add_argument("run_id"); s.add_argument("phase"); s.add_argument("--verdict-id", required=True); s.add_argument("--reviewer", required=True); s.add_argument("--executor")
@@ -371,11 +398,11 @@ def main() -> int:
 
     try:
         if a.cmd == "start":
-            _print_status(start_run(a.root, a.run_id, [p.strip() for p in a.phases.split(",") if p.strip()], executor=a.executor, provisional_advances=a.provisional_advances))
+            _print_status(start_run(a.root, a.run_id, [p.strip() for p in a.phases.split(",") if p.strip()], executor=a.executor, provisional_advances=a.provisional_advances, parent_run_id=a.parent_run_id, auto_write=a.auto_write), a.root)
         elif a.cmd == "set":
-            _print_status(set_status(a.root, a.run_id, a.phase, a.status, a.artifact))
+            _print_status(set_status(a.root, a.run_id, a.phase, a.status, a.artifact), a.root)
         elif a.cmd == "accept":
-            _print_status(accept(a.root, a.run_id, a.phase, a.verdict_id, a.reviewer, force=a.force))
+            _print_status(accept(a.root, a.run_id, a.phase, a.verdict_id, a.reviewer, force=a.force), a.root)
         elif a.cmd == "mark-provisional":
             _print_status(mark_provisional(a.root, a.run_id, a.phase, a.verdict_id, a.reviewer, executor=a.executor))
         elif a.cmd == "resume":
@@ -385,7 +412,7 @@ def main() -> int:
             print(rp["phase"])  # machine-readable: the resume target phase name
             print(json.dumps(rp), file=sys.stderr)
         elif a.cmd == "status":
-            _print_status(_load(a.root, a.run_id))
+            _print_status(_load(a.root, a.run_id), a.root)
         elif a.cmd == "list":
             d = Path(a.root) / ".aris" / "runs"
             for f in sorted(d.glob("*.json")) if d.exists() else []:

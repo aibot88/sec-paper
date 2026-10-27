@@ -95,20 +95,37 @@ sec-paper/
 needs (`tools/run_state.py`, `tools/idea_discovery_gate.py`, `tools/reviewer_route.py`,
 `tools/threat_scan.py`, `tools/research_wiki.py`, `tools/antigravity-exec/`).
 
-Set up the reviewer backend once per project (Codex executes, AntiGravity/Gemini reviews):
+Initialize the reviewer and capability manifest per research project (Codex executes, AntiGravity/Gemini reviews; no same-family fallback):
 
 ```bash
-cp ~/script/sec-paper/.aris/reviewer.example.json <project>/.aris/reviewer.json
-# {"backend":"antigravity","model":"gemini-3.8-flash-high","effort":"high"}
+python3 ~/script/sec-paper/tools/project.py init --project /path/to/project
+python3 ~/script/sec-paper/tools/project.py doctor --project /path/to/project --live
 ```
 
-Optional integrations (used when present, cleanly absent otherwise): ARIS
-`/run-experiment`, `/experiment-queue`, `/monitor-experiment` (execution
-primitives — sec-paper documents the contract and works without them),
-`/paper-plan` `/paper-write` `/paper-figure` `/paper-compile`
-`/paper-claim-audit` `/citation-audit` `/integrity-forensics` (writing-side
-helpers — sec-paper-writing falls back to inline equivalents), and
-`/render-html`, `research-wiki` (display/knowledge extras).
+Owned tools now implement local start/status/wait/cancel/queue (`jobs.py`),
+actual AntiGravity calls and version-bound receipts (`review.py`), nested
+section/plan/receipt gates, and final PDF/submission assurance
+(`paper_check.py`, `submission_gate.py`). See
+[the authoritative workflow contract](shared-references/workflow-contract.md).
+ARIS is not a runtime dependency. Rendering/third-party connectors are optional;
+submission audits are **not**. Local POSIX is the implemented job backend;
+requested remote backends require an explicit adapter and otherwise block.
+
+These are agent-executed Skills with tested orchestration contracts, not proof
+that a future scientific study is correct or already conducted. Final submission
+requires real raw evidence, five independent fresh Gemini audits, an anonymous
+reproducible artifact, real TeX/PDF tools and current official venue rules.
+Actual venue submission remains human-confirmed.
+
+### Regression tests
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Offline tests use clearly marked fake reviewer/experiment fixtures. They never
+count as real research acceptance. `review.py probe` is a separate live model
+availability check, not a paper review. Upstream notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ```bash
 git clone https://github.com/aibot88/sec-paper.git ~/script/sec-paper
@@ -142,6 +159,7 @@ bash ~/script/sec-paper/tools/install_sec_paper.sh --codex
 /sec-research-refine "problem | approach"   # anchored method refinement
 /sec-experiment-plan "refined proposal"     # oracle-first experiment roadmap
 /sec-paper-writing "NARRATIVE_REPORT.md"    # Big-Four manuscript + audit
+/sec-paper-audit "paper/"                 # five independent final audits + owned submission gate
 ```
 
 ---

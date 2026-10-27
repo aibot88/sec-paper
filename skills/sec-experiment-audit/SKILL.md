@@ -13,6 +13,8 @@ argument-hint: "[results-path-or-EXPERIMENT_RESULTS.md]"
 
 Audit experiment evidence integrity for: **$ARGUMENTS**
 
+Use tools/review.py from this repo (fresh session, explicit primary inputs and current run/phase). Save the real raw trace and version-bound receipt. Map AUDIT_PASS to JSON PASS and AUDIT_FAIL to BLOCK without changing its meaning. After any result/harness/claim input changes this receipt is stale; repeat the audit. See shared-references/workflow-contract.md. A Markdown AUDIT_PASS alone is not a valid receipt.
+
 ---
 
 ## Why This Is a Separate Step

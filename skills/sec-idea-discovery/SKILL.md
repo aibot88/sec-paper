@@ -7,11 +7,9 @@ argument-hint: "[security-direction] [— ref paper: <path-or-url>] [— auto pr
 # Workflow S1: Security Idea Discovery Pipeline (`sec-idea-discovery`)
 
 > **Before each reviewer slot**, follow the reviewer contract in `shared-references/reviewer-contract.md`:
-> resolve invocation → `.aris/reviewer.json` → host default with
+> resolve invocation → `.aris/reviewer.json` → AntiGravity/Gemini default with
 > `reviewer_route.py`. Save the route and actual returned identity; unavailable
-> selections are `REVIEW_UNAVAILABLE`. `sec-novelty-check` and
-> `sec-research-review` are the two **reviewer-bearing phases** — classify
-> acceptance from actual model families (same-family = provisional only).
+> selections are REVIEW_UNAVAILABLE/BLOCKED. Creator, novelty, external review and refinement are review-bearing phases and require fresh, positive, version-bound Gemini receipts. Read `shared-references/workflow-contract.md` for the authoritative independent lifecycle.
 
 Orchestrate the complete security idea discovery workflow for: **$ARGUMENTS**
 
@@ -64,14 +62,14 @@ Resolve `AUTO_PROCEED` once before Phase 0 and keep it for the whole run.
 Resolve `run_state.py` and `idea_discovery_gate.py` in this order:
 1. `<sec-paper-repo>/tools/run_state.py` (vendored copy — this repo ships it)
 2. `tools/run_state.py` in the project directory
-3. `tools/run_state.py` under a configured ARIS repo, if present
+3. Never require an ARIS checkout; unresolved owned tools block the run.
 
 Same order for `idea_discovery_gate.py` (the vendored edition defaults to
 the `sec-*` stage names and accepts `--phases`/`--review-phases` overrides).
 If neither helper is resolvable the final report is `BLOCKED` — never
 silently continue without a state record.
 
-For a new run, derive `<run_id>` from direction slug + date, then start the ordered record with `--executor <actual-model> --provisional-advances`:
+For a new run use `<outer-run-id>-ideas`, plus `--parent-run-id <outer-run-id>` when nested. Start with `--executor <actual-codex-model>`, never --provisional-advances. A standalone discovery run has its own unique ID and no parent:
 
 ```text
 sec-research-lit,sec-idea-creator,sec-novelty-check,sec-research-review,sec-research-refine-pipeline
@@ -87,11 +85,10 @@ Artifact locators (the gate checks the canonical report, not scratch files):
 | `sec-research-review` | `idea-stage/IDEA_REPORT.md#external-critical-review` |
 | `sec-research-refine-pipeline` | `refine-logs/FINAL_PROPOSAL.md` |
 
-The two **reviewer-bearing phases** require review receipts after `done`:
-- Same-family reviewer → `mark-provisional` with actual reviewer model + verdict/trace id.
-- Verified different-family reviewer (e.g., Claude/Gemini reviewing a Codex run) → `accept` with real identity.
+The four review-bearing phases (creator, novelty, external review, refinement) require receipts after done:
+- Use review.py to obtain an actual positive Gemini receipt on the owned artifact/section and raw evidence, then accept with its receipt path and actual model identity. No same-family or arbitrary verdict-ID receipt is valid.
 - `sec-novelty-check`: `PROCEED` and `PROCEED WITH CAUTION` are positive; `ABANDON` is negative — no receipt, pick the next surviving candidate and re-run the phase.
-- Never invent ids; never mark provisional without the positive verdict in hand.
+- Never invent IDs; negative/unavailable/stale reviews do not advance. Research-lit is an execution-only phase: nonempty artifact plus done completes it for resume.
 
 At the end run:
 
@@ -116,6 +113,7 @@ On non-zero exit the gate writes `BLOCKED: <stage> evidence missing` — do not 
    - Forbidden during pilots: unconsented production traffic, real user data, state-mutating requests to third-party services.
 3. If `REF_PAPER` is set, summarize it now (mechanism, threat model, oracle, limitations) and use it as generation context.
 4. Initialize `idea-stage/` and the run state.
+5. Run project.py init/doctor, record capability/source/resource checks and resolved parameters in .aris/context.json. Pass REF_PAPER, budget, authorization, COMPACT and reviewer settings to every child, not just the direction string.
 
 ### Phase 1: Literature & Specification Landscape — `/sec-research-lit`
 
@@ -131,7 +129,7 @@ Requires the output to contain: mechanism-decomposed neighbor map, assumption fr
 /sec-idea-creator "<direction>" — context: Phase 1 landscape, authorization scope from Phase 0
 ```
 
-Enforce the sec contract: 8–12 candidates across Attack/Defense/Measurement tracks → Phase-3 three-way status gate (`FEASIBLE_NOW` / `EXPERIMENT_BLOCKED` / `HYPOTHESIS_REFUTED_OR_DUPLICATE`) → fresh-thread triage shortlist → Phase-5 pilots via `/run-experiment` + `/monitor-experiment` under the locked pilot contract (oracle, dedup unit, matched budget) → four-state verdicts + evidence re-ranking.
+Enforce the sec contract: Codex candidates -> dedup/resource/authorization gate -> fresh Gemini triage -> sec-novelty-check -> isolated pilots via bundled jobs.py queue/status/wait -> four-state evidence re-ranking -> fresh Gemini validation. Preserve inherited budgets, candidate IDs, oracle/dedup units and matched initial state.
 
 Checkpoint (per `AUTO_PROCEED`): report pilot verdict table + re-ranked candidates. Gate: `#ranked-ideas` present with verdicts.
 
@@ -141,7 +139,7 @@ Checkpoint (per `AUTO_PROCEED`): report pilot verdict table + re-ranked candidat
 /sec-novelty-check "<top candidate claim set>" — composed: idea-stage/IDEA_REPORT.md
 ```
 
-Run on the top-ranked `SUPPORTED` candidate (or the highest-ranked candidate if none piloted cleanly). Verify mechanism + trust-boundary novelty against Big-Four proceedings, RFCs, advisories. Record the review receipt (`accept`/`mark-provisional`) per the run-state contract. On `ABANDON`: take the next surviving candidate and re-run — do not proceed to Phase 4 with an `ABANDON` verdict.
+Review the final post-pilot claim for the top-ranked supported candidate. If none is supported, retain a clearly UNVALIDATED proposal and block a validated handoff until evidence is obtained; no clean pilot is not evidence of success. Verify mechanism/trust-boundary novelty against actual papers/specs/advisories, record a fresh Gemini receipt via accept. ABANDON selects another survivor or stops/revises; never advance a negative verdict.
 
 ### Phase 4: Big-Four Adversarial Review — `/sec-research-review`
 
@@ -159,7 +157,7 @@ Pass **file paths**, not summaries. The reviewer audits threat-model sanity, del
 
 Chains `sec-research-refine` (anchors + deletability + iterative reviewer rounds → `FINAL_PROPOSAL.md`) and `sec-experiment-plan` (claims→evidence matrix, RQ1–RQ4 with A3, ablation matrix, statistics protocol, ethics checkpoints → `EXPERIMENT_PLAN.md` + `EXPERIMENT_TRACKER.md` + `PIPELINE_SUMMARY.md`).
 
-Gate: `refine-logs/FINAL_PROPOSAL.md` exists. Then run the final `idea_discovery_gate.py`.
+Gate: FINAL_PROPOSAL, EXPERIMENT_PLAN, EXPERIMENT_TRACKER and REVIEW_SUMMARY are nonempty, with a fresh positive Gemini refinement receipt covering all four. Then run idea_discovery_gate.py; its PASS does not manufacture review receipts. Obtain a final aggregate Gemini receipt for the outer sec-idea-discovery phase after child gate PASS.
 
 ### Phase 6: Final Report & Optional Render
 

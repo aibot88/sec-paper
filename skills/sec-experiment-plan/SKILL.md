@@ -21,7 +21,7 @@ Security adaptation of `experiment-plan`: every experiment block must declare it
 ## Constants
 
 - **MAX_CORE_EXPERIMENTS = 4** — Cap on headline result blocks (RQ1–RQ4).
-- **MIN_TRIALS_STOCHASTIC = 10** — Minimum independent trials for any randomized method (fuzzing, LLM-guided probing, randomized scheduling). Deterministic PoCs may run once but must be labeled *existence proof only*.
+- **TRIAL_PLAN = evidence-driven** — Plan independent trials using pilot variance, effect of interest, confidence/precision/power and budget. Ten trials may be a starting estimate, never a sufficiency guarantee. Deterministic PoCs may run once but are existence evidence, not comparative superiority.
 - **OUTPUT = `refine-logs/EXPERIMENT_PLAN.md` + `refine-logs/EXPERIMENT_TRACKER.md`**.
 
 ---
@@ -61,13 +61,13 @@ Structure the evaluation as RQ1–RQ4, ordered by dependency:
 - **One moving piece per ablation.** Disable exactly one component on identical targets; never ablate two things at once.
 - **Budget matching table:** for every comparison, pin seed state (auth tokens, pre-populated DB, crawl spec), request budget, wall-clock window, and hardware.
 - **Timeout discipline (Klees et al., CCS'18):** report results at ≥2 budget checkpoints (e.g., 6h and 24h) — rankings can invert; a single cutoff is cherry-picking.
-- **Statistics protocol:** stochastic methods → ≥`MIN_TRIALS_STOCHASTIC` independent trials, median + IQR, Mann-Whitney U with reported p-values. Single runs are smoke tests, never comparative claims.
+- **Statistics protocol:** predeclare the independent experimental unit, justified trial/sample count, uncertainty and a test appropriate to pairing/clustering/distribution (Mann-Whitney U only when its assumptions fit). Report effect sizes and confidence intervals; correct multiple comparisons where applicable. Single runs are smoke tests, never comparative claims.
 
 ### Phase 4: Ethics, Environment & Disclosure Checkpoints
 
 - **Environment plan:** exact container images, app versions, 40-char commit SHAs, role accounts; verify authorization scope for every target (local/containerized only unless consent documented).
 - **Live-system rule:** if any experiment touches shared/public infrastructure, it gets an explicit consent + rate-limit + non-mutating justification — otherwise redesign to local reproduction.
-- **Disclosure trigger:** define now what finding triggers the 90-day coordinated disclosure workflow (see `references/venues-and-ethics-2026.md`).
+- **Disclosure trigger:** define the applicable vendor/venue disclosure process and embargo for a confirmed finding; a 90-day example is not a universal policy.
 
 ### Phase 5: Run Order, Tracker & Artifact Readiness
 

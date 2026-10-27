@@ -59,20 +59,22 @@ Exit this stage only when these are explicit:
 - the final threat preconditions (post-migration);
 - the remaining risks.
 
-If the last verdict is still `REVISE`, proceed only with weaknesses clearly documented in `REFINEMENT_REPORT.md`.
+If the last verdict is still REVISE, a draft experiment plan may be written with weaknesses documented, but the validated handoff remains BLOCKED. Do not accept this phase or launch a validated full campaign on a rejected thesis.
 
 ### Phase 2: Experiment Planning Stage
 
 Run `sec-experiment-plan` on `FINAL_PROPOSAL.md`:
 - Claims → evidence matrix with declared oracles and experimental units;
 - RQ1–RQ4 blocks incl. mandatory A3 adaptive-attacker evaluation for defense/detection;
-- Ablation matrix (one moving piece), budget-matching table, statistics protocol (≥10 trials for stochastic methods);
+- Ablation matrix, matched budgets and a justified independent-trial/sample-size/uncertainty protocol (not a fixed count guaranteeing significance);
 - Ethics/environment/disclosure checkpoints;
 - Run order + `EXPERIMENT_TRACKER.md` + artifact script mapping.
 
 ### Phase 3: Pipeline Summary
 
 Write `refine-logs/PIPELINE_SUMMARY.md`:
+
+After all four required outputs are final, obtain a fresh Gemini acceptance via tools/review.py for sec-research-refine-pipeline on FINAL_PROPOSAL.md, EXPERIMENT_PLAN.md, EXPERIMENT_TRACKER.md and REVIEW_SUMMARY.md. Warm method-repair checks alone do not accept this stage. Save real receipt/trace and record it in run_state. Do not edit sealed evidence without re-review.
 
 ```markdown
 # Security Refine Pipeline Summary

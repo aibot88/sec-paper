@@ -96,7 +96,7 @@ Map the technical reality before brainstorming. Do **not** limit search to the l
 
 ### Phase 2: Divergent Hypothesis Generation (Brainstorm Session)
 
-Use a generation agent (or the configured reviewer backend in **brainstorm mode**) to generate **8–12 concrete candidates** across three tracks:
+Codex generates **8–12 concrete candidates** across three tracks. AntiGravity/Gemini is the reviewer only, never the brainstorming fallback. Follow `shared-references/workflow-contract.md` from this repository for bootstrap, resource budgets, execution, and receipt requirements:
 - **Track A — Attack / Vulnerability Discovery** (new attack class, cross-layer bypass, automated bug finding with a new oracle)
 - **Track B — Defense / Runtime Enforcement / Detection** (architectural isolation, policy enforcement, low-FP detection resilient to adaptive attackers)
 - **Track C — Measurement / Diagnostic / Replication** (empirical characterization, root-cause taxonomy, or refuting an assumed security property)
@@ -142,6 +142,7 @@ Hard constraints on brainstorming:
 
 1. **Cluster near-duplicates** that test the same underlying invariant on the same boundary.
 2. **Three-way feasibility & ethics classification** (never conflate experimental blockage with falsification):
+   - Before classification read the inherited resource budget and doctor output; check target deployment dependencies, available CPU/RAM/container slots/ports, state-reset cost, oracle construction, request/time/trial estimates. FEASIBLE_NOW needs an affordable concrete pilot, not just a promising mechanism. Record unavailable resources as blockage/deferred budget, never scientific refutation.
    - **`FEASIBLE_NOW`**: can be piloted in an authorized local/containerized/public-artifact environment within reasonable wall-clock and engineering effort.
    - **`EXPERIMENT_BLOCKED`**: hypothesis may be valid, but the proposed test requires unconsented live systems, unavailable proprietary tenant data, or an unbuilt oracle. **Action:** keep the hypothesis alive and either redesign the pilot around an open-source/controlled reproduction or mark as blocked pending environment setup.
    - **`HYPOTHESIS_REFUTED_OR_DUPLICATE`**: objectively covered under identical threat assumptions by a verified prior paper/spec, or contains a self-contradictory threat model (e.g., adversary already possesses the target secret/privilege in the precondition).
@@ -154,7 +155,7 @@ Hard constraints on brainstorming:
 
 ### Phase 4: Fresh-Context Adversarial Triage & Root-Cause Novelty Check
 
-**CRITICAL:** Open a **fresh** reviewer session/thread (never reuse Phase 2's `threadId`). Pass only the consolidated candidate cards and Phase 1–3 evidence notes. Run the steps in this exact order so the fast cross-model triage gates the expensive multi-source `/novelty-check`:
+**CRITICAL:** Open a **fresh Gemini** reviewer session/thread. Pass the candidate cards and original evidence paths. Run the steps in this exact order so triage gates the expensive `/sec-novelty-check`:
 
 1. **Step 4.1 — Fresh-context adversarial triage (Reviewer 排序初筛)**:
 
@@ -182,12 +183,12 @@ For each candidate, audit strictly against security reviewing standards:
 Rank all feasible candidates by expected scientific information gained per unit of pilot effort, and shortlist the top 3-4 candidates for deep root-cause novelty verification.
 ```
 
-2. **Step 4.2 — Root-cause novelty check (`/novelty-check` on top shortlist)**:
-   - Invoke `/novelty-check` on each shortlisted candidate from Step 4.1.
+2. **Step 4.2 — Root-cause novelty check (`/sec-novelty-check` on top shortlist)**:
+   - Invoke `/sec-novelty-check` on each shortlisted candidate from Step 4.1, preserving candidate IDs, query sources and actual reviewer receipts.
    - Verify whether the **mechanism and broken invariant** (not just the target product name) already appear in S&P/USENIX/CCS/NDSS/WWW/ICSE papers, RFCs, or public vulnerability writeups.
    - Finding a known vulnerability class in one more web app is a bug report, not a research paper — unless the candidate demonstrates a **new root-cause mechanism, a systematic cross-framework blind spot, or a generalizable detection/defense principle**.
 3. **Step 4.3 — Select Pilot Slate (Top 2–3)**:
-   - Combine the fresh-context reviewer ranking with `/novelty-check` verdicts and select the top `MAX_PILOT_IDEAS` (2–3) surviving candidates for Phase 5 pilots. Keep unselected feasible candidates recorded as `DEFERRED_BUDGET`.
+   - Combine the fresh-context reviewer ranking with `/sec-novelty-check` verdicts and select at most MAX_PILOT_IDEAS surviving candidates. Keep unselected feasible candidates recorded as DEFERRED_BUDGET. No survivors means stop/revise, not invent a pilot.
 
 ---
 
@@ -219,27 +220,23 @@ For each selected candidate, write down:
 | **Defense / Detection** | (1) Blocks/detects known true positives, (2) preserves benign workflows (false-positive check), (3) survives at least one **A3 adaptive bypass probe** aimed at its core mechanism, and (4) reports runtime/deployment overhead. | High F1 on a synthetic dataset where ground truth comes from another scanner; beating only a strawman baseline with no adaptive attacker test. |
 | **Measurement / Diagnostic** | Well-defined sampling frame and denominator, validated measurement oracle on a manually audited subset (precision/blind-spot check), and a non-trivial finding that changes how the community understands the threat or defense. | Scraping N websites/repos and reporting unverified scanner hits as "X% of the Web is vulnerable." |
 
-#### Step 5.3 — Deploy Parallel Pilots (`/run-experiment`)
-Invoke `/run-experiment` to launch the 2–3 isolated pilot harnesses in parallel (e.g., separate Docker Compose stacks, namespaces, browser contexts, or worker nodes):
+#### Step 5.3 — Deploy isolated local pilots
+Use bundled `tools/jobs.py` to launch isolated harnesses. Every job spec declares id, argv command, target, target_revision, seed, isolation_key and timeout_seconds:
 
 ```text
-/run-experiment [Pilot 1 harness command — isolated target/port/container]
-/run-experiment [Pilot 2 harness command — isolated target/port/container]
-/run-experiment [Pilot 3 harness command — isolated target/port/container]
+python3 "$SEC_PAPER/tools/jobs.py" queue --project "$PROJECT" --spec pilot-jobs.json --parallel 3
 ```
 
 Ensure strict state isolation between concurrent pilots (never run two stateful Web scanners against the same mutable database instance at the same time).
 
-> **Standalone note:** `/run-experiment` and `/monitor-experiment` are
-> host-provided primitives. Without them, execute the pilot harness commands
-> directly — same contract: isolated state, `results/<run_id>/` artifacts,
-> enforced budgets, truncated runs recorded as `UNDERPOWERED_OR_BLIND`.
+The bundled local backend preserves config/logs, deadlines, cancellation and wave dependencies. External ARIS launchers are unnecessary. Do not silently substitute local execution for a requested unsupported remote backend.
 
-#### Step 5.4 — Monitor & Collect Evidence (`/monitor-experiment`)
-Use `/monitor-experiment` to track pilot progress, enforce wall-clock budgets, and collect structured artifacts (state diffs, reproduction traces, false-positive logs, timing/overhead metrics):
+#### Step 5.4 — Monitor & Collect Evidence
+Track real job IDs and collect state diffs, reproduction traces, FP logs and timing:
 
 ```text
-/monitor-experiment [session-or-target]
+python3 "$SEC_PAPER/tools/jobs.py" status --project "$PROJECT" --id pilot-1
+python3 "$SEC_PAPER/tools/jobs.py" wait --project "$PROJECT" --id pilot-1
 ```
 
 If a pilot exceeds its declared timeout without reaching the target state, stop it and record the truncated observation as `UNDERPOWERED_OR_BLIND` rather than silently fabricating a negative verdict.
@@ -258,7 +255,7 @@ If a pilot exceeds its declared timeout without reaching the target state, stop 
 
 ### Phase 6: Output — Security Idea Report & Fact-Pack Seed
 
-Write the canonical report to `idea-stage/IDEA_REPORT.md`.
+Update only this phase's sections of `idea-stage/IDEA_REPORT.md`; preserve the existing literature, previous phase receipts and failed candidates. After evidence re-ranking, obtain a fresh Gemini acceptance of `idea-stage/IDEA_REPORT.md#ranked-ideas` plus raw pilots. Seal that owned section via review.py before the discovery gate. A reviewer failure or no valid pilots means UNVALIDATED/BLOCKED, not validated recommendations.
 
 **Lead every candidate with its Security Property & Threat Boundary Card**, followed by a plain-language 2–4 step description of what we actually build, instrument, or measure.
 

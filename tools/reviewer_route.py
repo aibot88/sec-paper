@@ -73,7 +73,7 @@ def resolve_route(
     if tier not in {"deep", "regular"}:
         raise ValueError(f"unknown review tier: {tier!r}")
     config = _config(project)
-    default = _backend(default_reviewer) if default_reviewer is not None else "codex"
+    default = _backend(default_reviewer) if default_reviewer is not None else "antigravity"
     project_backend = config.get("backend", default)
     backend = _backend(reviewer) if reviewer is not None else project_backend
     source = "inline" if reviewer is not None else "project" if config else "host-default"
@@ -84,6 +84,8 @@ def resolve_route(
         if value is not None and (not isinstance(value, str) or not value.strip()):
             raise ValueError(f"reviewer {field} must be a nonempty string or null")
 
+    if backend != "antigravity":
+        raise ValueError("sec-paper requires AntiGravity/Gemini review; no same-family fallback")
     transport = "mcp"
     fresh_tool = continuation_tool = None
     if backend in LEGACY_BACKENDS:
@@ -100,7 +102,9 @@ def resolve_route(
             transport = "codex-mcp"
             fresh_tool, continuation_tool = "mcp__codex__codex", "mcp__codex__codex-reply"
     elif backend == "antigravity":
-        selected_model = selected_model or "gemini-4-argon-high"
+        selected_model = selected_model or "gemini-3.8-flash-high"
+        if not selected_model.startswith("gemini-"):
+            raise ValueError("AntiGravity reviewer must report a Gemini model")
         selected_effort = selected_effort or "high"
         if selected_effort not in {"low", "medium", "high", "xhigh", "max"}:
             raise ValueError("Antigravity reviewer effort must be low, medium, high, xhigh, or max")

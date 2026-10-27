@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TARGET_DIR=""
+PROJECT_DIR=""
 OVERRIDE_GENERIC=false
 
 usage() {
@@ -30,6 +31,8 @@ EOF
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project)
+      [[ $# -ge 2 && -d "$2" ]] || { echo "--project requires an existing directory" >&2; exit 1; }
+      PROJECT_DIR="$(cd "$2" && pwd)"
       TARGET_DIR="$(cd "$2" && pwd)/.agents/skills"
       shift 2
       ;;
@@ -65,7 +68,16 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-for skill in sec-research-pipeline sec-idea-discovery sec-research-lit sec-idea-creator sec-novelty-check sec-research-review sec-research-refine sec-experiment-plan sec-research-refine-pipeline sec-experiment-bridge sec-result-to-claim sec-ablation-planner sec-experiment-audit sec-auto-review-loop sec-paper-writing sec-paper-improve-loop; do
+if [[ -n "$PROJECT_DIR" ]]; then
+  python3 "$REPO_ROOT/tools/project.py" init --project "$PROJECT_DIR"
+fi
+
+for skill_path in "$REPO_ROOT"/skills/*/SKILL.md; do
+  skill="$(basename "$(dirname "$skill_path")")"
+  if [[ -e "$TARGET_DIR/$skill" && ! -L "$TARGET_DIR/$skill" ]]; then
+    echo "Refusing to overwrite a real directory: $TARGET_DIR/$skill" >&2
+    exit 1
+  fi
   ln -sfn "$REPO_ROOT/skills/$skill" "$TARGET_DIR/$skill"
   echo "Linked: $TARGET_DIR/$skill -> $REPO_ROOT/skills/$skill"
 done
@@ -73,6 +85,10 @@ done
 if $OVERRIDE_GENERIC; then
   for pair in "idea-creator:sec-idea-creator" "idea-discovery:sec-idea-discovery" "research-pipeline:sec-research-pipeline"; do
     name="${pair%%:*}"; target="${pair##*:}"
+    if [[ -e "$TARGET_DIR/$name" && ! -L "$TARGET_DIR/$name" ]]; then
+      echo "Refusing to overwrite a real directory: $TARGET_DIR/$name" >&2
+      exit 1
+    fi
     ln -sfn "$REPO_ROOT/skills/$target" "$TARGET_DIR/$name"
     echo "Linked override: $TARGET_DIR/$name -> $REPO_ROOT/skills/$target"
   done

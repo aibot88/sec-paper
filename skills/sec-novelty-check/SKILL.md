@@ -97,5 +97,5 @@ Output the structured report (and fold into `idea-stage/IDEA_REPORT.md#novelty-v
 ```
 
 **Run-state integration (when called inside `/sec-idea-discovery` with `RESUMABLE=true`)**:
-- Both `PROCEED` and `PROCEED WITH CAUTION` count as positive verdicts for `run_state.py` (`accept` for verified cross-family reviewer, `mark-provisional` for same-family Codex reviewer).
+- Both PROCEED and PROCEED WITH CAUTION are positive only after actual completed in-scope Gemini review via tools/review.py. Use accept with the real receipt path; same-family provisional advances are disabled. Seal the owned novelty section and include dependent candidate/raw evidence inputs per shared-references/workflow-contract.md.
 - `ABANDON` is negative: do not record a positive receipt; switch to the next surviving candidate or refine the mechanism delta.

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "run_id": "REPLACE_WITH_CURRENT_RUN_ID",
+  "paper_dir": "paper",
+  "fact_pack": "FACT_PACK.md",
+  "research_contract": "idea-stage/docs/research_contract.md",
+  "raw_results": ["results"],
+  "venue_policy": "paper/venue-policy.json",
+  "artifact_readme": "artifact/README.md",
+  "artifact_dir": "artifact",
+  "theory_claims": false,
+  "audits": {
+    "claims": ".aris/traces/REPLACE/receipt.json",
+    "citations": ".aris/traces/REPLACE/receipt.json",
+    "adversarial": ".aris/traces/REPLACE/receipt.json",
+    "proof": ".aris/traces/REPLACE/receipt.json",
+    "artifact": ".aris/traces/REPLACE/receipt.json"
+  }
+}

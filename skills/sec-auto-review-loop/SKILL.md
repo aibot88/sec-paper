@@ -7,10 +7,9 @@ argument-hint: "[direction-or-artifacts] [— difficulty: medium|hard|nightmare]
 # Workflow S2: Security Auto Review Loop (`sec-auto-review-loop`)
 
 > **Reviewer slots**: resolve per the reviewer contract in `shared-references/reviewer-contract.md`. Each review
-> round is **fresh-context for the artifacts** — the reviewer reads result files
-> and diffs, never the executor's self-assessment. The same reviewer *session*
-> may persist across rounds for objection-continuity (same rationale as
-> `sec-research-refine`), but its inputs stay cold.
+> final acceptance is fresh-context Gemini reading actual artifacts. Warm
+> repair checks may preserve objections, but are explicitly warm and never
+> count as final acceptance. Read shared-references/workflow-contract.md.
 
 Run an autonomous review-fix loop for: **$ARGUMENTS**
 
@@ -24,7 +23,7 @@ RESULT_TO_CLAIM.md     ├─→ Round N: reviewer scores → executor fixes →
 harness + results/     ┘         until STOP or MAX_ROUNDS
 ```
 
-Security-adapted from `auto-review-loop`: the reviewer is a Big-Four PC member auditing **evidence integrity**, not an ML reviewer asking about training curves. Two hard gates make this more than a score loop — a round cannot `STOP` while a hard gate fails, regardless of numeric score.
+Security-adapted from auto-review-loop: five hard gates make this more than a score loop. No STOP while any hard gate fails, regardless of numeric score.
 
 ---
 
@@ -35,7 +34,7 @@ Security-adapted from `auto-review-loop`: the reviewer is a Big-Four PC member a
 - **HUMAN_CHECKPOINT = false** — `true` pauses after each review for user direction.
 - **REVIEWER_DIFFICULTY = medium** — `medium`: standard review. `hard`: + reviewer memory of prior weaknesses + debate protocol. `nightmare`: reviewer reads the repo/results directly + memory + debate.
 - **MAX_FIX_EXPERIMENTS_PER_ROUND = 3** — A round may schedule at most 3 supplementary experiments; bigger gaps route back to `sec-experiment-plan` instead of patch-looping.
-- **RESUMABLE = true** — Round state under `review-stage/` and `.aris/runs/` where available.
+- **RESUMABLE = true** — Mandatory review-stage/REVIEW_STATE.json and append-only ACQUITTAL_LOG.jsonl, plus .aris/runs state. Persist the fields and recovery rules in shared-references/workflow-contract.md after every phase boundary; missing evidence blocks acceptance.
 
 ---
 
@@ -88,13 +87,13 @@ MAX_FIX_EXPERIMENTS_PER_ROUND new experiments.
 
 Executor implements the fixes in weakness order:
 - FATAL/hard-gate failures first — these are never optional.
-- Supplementary experiments go through the same `/run-experiment` + `/monitor-experiment` path with oracle + dedup intact; update `EXPERIMENT_TRACKER.md` and `EXPERIMENT_RESULTS.md`.
+- Supplementary experiments go through bundled jobs.py with oracle and dedup intact. Persist pending job IDs and resume those jobs, never duplicate a running experiment. Update tracker/results, then rerun sec-experiment-audit and sec-result-to-claim on the NEW snapshot before re-review. Old acceptances do not apply to new evidence.
 - If a weakness demands reframing the claim (e.g., narrower threat model), log it as an explicit **claim-migration entry** in `RESULT_TO_CLAIM.md` — never edit results to fit the old claim.
 - `HUMAN_CHECKPOINT = true`: after presenting the review + planned fixes, end turn and wait.
 
 ### Phase 3: Re-Review & Iterate
 
-Re-review the updated pack (same reviewer session for objection-continuity; artifacts stay cold). Repeat until:
+Warm repair checks may use review.py --continue-from, preserving objections. Before STOP obtain a NEW-session Gemini verdict on the final audited results/claims; only this fresh positive receipt accepts the phase. Append actual raw trace and receipt to ACQUITTAL_LOG and persist REVIEW_STATE. Repeat until:
 - `STOP` with all hard gates green and score ≥ `STOP_SCORE` → write verdict, exit.
 - `MAX_ROUNDS` reached → write the final assessment **with unresolved weaknesses listed** — never report a timed-out loop as "passed".
 - The same weakness recurs for 2 consecutive rounds → escalate to `pivot` recommendation instead of a fifth identical fix.
@@ -105,4 +104,4 @@ Write `review-stage/SEC_AUTO_REVIEW.md`:
 - Per-round: hard-gate table, score, weaknesses, fixes applied, new results.
 - Final: verdict (`STOP`/`MAX_ROUNDS`), claim status after all rounds, claim-migration log, remaining limitations for the paper's Discussion section, and the figure/table inventory the results now support.
 
-Hand off to the summary stage (`sec-research-pipeline` Stage 4) or directly to `/sec-paper-writing` with `NARRATIVE_REPORT.md` once assembled.
+An unsuccessful loop may hand off an honest research STATUS report, not validated writing. Submission assurance remains BLOCKED after MAX_ROUNDS, pivot, unavailable review, unresolved hard gates or stale evidence. A positive final receipt plus current claims routing is required for validated writing.

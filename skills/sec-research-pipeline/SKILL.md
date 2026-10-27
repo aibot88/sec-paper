@@ -8,8 +8,9 @@ argument-hint: "[security-direction] [— auto proceed: false] [— auto write: 
 
 > **Reviewer slots**: resolve per the reviewer contract in `shared-references/reviewer-contract.md` throughout;
 > forward invocation reviewer/model/effort overrides to reviewer-bearing
-> children. Same-family verdicts stay `provisional`; only completed positive
-> known-cross-family or deterministic evidence gates produce `accepted`.
+> children. Codex generates/executes; only AntiGravity/Gemini reviews.
+> Follow shared-references/workflow-contract.md for owned tools, phase kinds,
+> parent/child run IDs, receipt freshness and final submission assurance.
 
 End-to-end autonomous security research workflow for: **$ARGUMENTS**
 
@@ -22,7 +23,7 @@ End-to-end autonomous security research workflow for: **$ARGUMENTS**
 ├─ Workflow S1 ──────┤├─ Workflow S1.5 ────────┤├─ evidence gate ──────┤├── Workflow S2 ───────┤           ├── W3 ────────────┤
 ```
 
-Supporting skills invoked inside stages (not pipeline stages themselves): `/sec-result-to-claim` (routing, re-run on every new evidence batch), `/sec-ablation-planner` (after claims pass), `/run-experiment`, `/experiment-queue`, `/monitor-experiment`, `/paper-figure`, `/paper-compile`, `/render-html`.
+Owned support: sec-result-to-claim, sec-ablation-planner, sec-paper-audit, tools/jobs.py, review.py, paper_check.py and submission_gate.py. Rendering is optional; no ARIS launcher/writer/auditor is a runtime requirement.
 
 ---
 
@@ -48,7 +49,7 @@ Identical to `/sec-idea-discovery`: resolve `AUTO_PROCEED` once, keep for the wh
 
 ## Resumable Runs
 
-Same helper-resolution pattern as `/sec-idea-discovery`: prefer the vendored copies under `<sec-paper-repo>/tools/` (`run_state.py`, `watchdog.py`, `iteration_log.py`), then project `tools/`, then a configured ARIS repo. Stage list for `run_state start`:
+Resolve this repository from .aris/sec-paper.json or the real installed Skill path. All helpers are owned under tools/; unresolved tools block, never require ARIS. Use a unique outer ID and a different <outer>-ideas child ID. Stage list:
 
 ```text
 sec-idea-discovery,sec-experiment-bridge,sec-experiment-audit,sec-auto-review-loop,summary,sec-paper-writing
@@ -56,12 +57,12 @@ sec-idea-discovery,sec-experiment-bridge,sec-experiment-audit,sec-auto-review-lo
 
 | Stage | Terminal record |
 |---|---|
-| `sec-idea-discovery` | its internal evidence gate `PASS` + review receipts → accepted/provisional per family |
-| `sec-experiment-bridge` | deterministic job/result completion → `accepted` (blocked runs record evidence, not success) |
+| `sec-idea-discovery` | child gate PASS + fresh aggregate Gemini receipt -> accepted |
+| `sec-experiment-bridge` | execution-only done + nonempty results; semantic evidence audit is separate |
 | `sec-experiment-audit` | `AUDIT_PASS` verdict with trace → `accepted`; `AUDIT_FAIL` keeps the stage open |
-| `sec-auto-review-loop` | positive STOP with all hard gates green: same-family → `mark-provisional`; cross-family → `accept` |
-| `summary` | `NARRATIVE_REPORT.md` exists → `accepted` |
-| `sec-paper-writing` | pre-submission audit gate PASS; `skipped` when `AUTO_WRITE=false` |
+| `sec-auto-review-loop` | fresh Gemini STOP with all gates green -> accepted; MAX_ROUNDS does not pass |
+| `summary` | execution-only done + nonempty narrative/fact pack; no scientific acceptance inferred |
+| `sec-paper-writing` | submission_gate PASS + final Gemini aggregate receipt; skipped only if AUTO_WRITE=false |
 
 ---
 
@@ -69,7 +70,7 @@ sec-idea-discovery,sec-experiment-bridge,sec-experiment-audit,sec-auto-review-lo
 
 ### Stage 0: Initialize
 
-1. Create run state (`RESUMABLE`); resolve helpers; warn-and-skip (never pretend) if unavailable.
+1. Run tools/project.py init and doctor --live for the target project, record capability/resource checks and .aris/context.json. Create run state with actual Codex identity and --auto-write only if requested. Missing owned state tools or reviewer blocks, never warn-and-skip.
 2. Extract direction, authorization scope, venue hint, and any `RESEARCH_BRIEF.md`.
 3. Record the authorization scope where every downstream stage can read it — it is a **pipeline-wide invariant**, not per-stage decoration.
 
@@ -99,9 +100,9 @@ AUTO_PROCEED: selected Candidate 1. Continuing to Stage 2.
 /sec-experiment-bridge "$CHOSEN_CANDIDATE" — code review: $CODE_REVIEW, base repo: $BASE_REPO, compact: $COMPACT
 ```
 
-Implements harness + oracle + dedup + A3 components → security code review → sanity → deploys via `/run-experiment` or `/experiment-queue` → collects oracle-verified results → ablations → `RESULT_TO_CLAIM.md` routing.
+Implements harness/oracle/dedup/A3 -> fresh Gemini code review -> sanity -> bundled jobs.py queue -> collected evidence -> evidence audit -> claims -> ablations -> new audit/claims.
 
-**Output:** `refine-logs/EXPERIMENT_RESULTS.md` + updated `EXPERIMENT_TRACKER.md` + `refine-logs/RESULT_TO_CLAIM.md`. Monitor with `/monitor-experiment`. Claims `contradicted` → check publishable negative finding, else stop with documented pivot — do not force a dead claim into Stage 3. When main claims pass, `/sec-ablation-planner` designs the four-axis ablation wave (component / attacker-tier / oracle-coverage / target-family).
+Output: results, updated tracker and current RESULT_TO_CLAIM.md. Monitor jobs.py by real job ID. Contradicted claims route to negative findings/pivot, not a forced positive Stage 3. Supported/partial claims permit applicable sec-ablation-planner axes.
 
 ### Stage 2.5: Experiment Integrity Audit — `/sec-experiment-audit`
 
@@ -117,7 +118,7 @@ Independent fresh-context audit of the **evidence layer** before any result beco
 /sec-auto-review-loop "$ARGUMENTS — [chosen candidate]" — difficulty: $REVIEWER_DIFFICULTY, human checkpoint: $HUMAN_CHECKPOINT
 ```
 
-Up to 4 rounds of hard-gated review→fix→re-review. Exit on `STOP` (all hard gates green, score ≥ 6/10), `MAX_ROUNDS`, or pivot escalation. **Output:** `review-stage/SEC_AUTO_REVIEW.md`.
+Up to 4 hard-gated review/fix rounds. Final STOP requires a fresh positive Gemini receipt on current audited evidence. MAX_ROUNDS/pivot may produce a status summary but blocks validated writing/submission. Output review-stage/SEC_AUTO_REVIEW.md plus resumable state and append-only real review receipts.
 
 ### Stage 4: Research Summary & Writing Handoff
 
@@ -164,6 +165,6 @@ Skip if `AUTO_WRITE=false` — print the manual command instead:
 /sec-paper-writing "NARRATIVE_REPORT.md" — venue: <VENUE>
 ```
 
-If `AUTO_WRITE=true` and `VENUE` set: invoke `/sec-paper-writing` which enforces the Big-Four scaffold, Fact-Pack provenance, A3 section, and Ethics + Open Science appendices, then its own 6-point pre-submission audit gate. Optionally follow with `/sec-paper-improve-loop` for 1–2 text-layer hard-gate rounds before submission.
+If AUTO_WRITE=true and actual VENUE/CYCLE are set, and the final research review is positive: run sec-paper-writing, optional sec-paper-improve-loop, then mandatory sec-paper-audit on the LAST revision. The six-point security checklist supplements rather than replaces five independent final Gemini audits. Only tools/submission_gate.py PASS permits submission-ready. Missing venue defers writing; missing audits/tools block assurance, not a fabricated pass. Never automatically click a venue's final submission button.
 
 > **Post-submission branches** (out of scope for this pipeline): `/rebuttal`, `/resubmit-pipeline`, `/paper-talk` remain generic ARIS skills — invoke manually when a venue response arrives.

@@ -387,6 +387,9 @@ def run_antigravity(
         stop_ticker.set()
         ticker_thread.join()  # nothing may touch the inbox after we hand control back
         stderr_thread.join()
+        proc.stdout.close()
+        if proc.stderr is not None:
+            proc.stderr.close()
 
     if outcome.cancelled:
         outcome.error = outcome.cancel_reason

@@ -22,7 +22,7 @@ Unlike generic ML literature surveys that scan only the last 2 years of arXiv pr
 ## Constants & Sources
 
 - **PAPER_LIBRARY** — Check `papers/`, `literature/`, or path in `AGENTS.md`.
-- **SOURCES = `all`** — Supports `zotero`, `obsidian`, `local`, `web`, `semantic-scholar`, `deepxiv`, `exa`, `gemini`, `openalex`, `all` (identical source detection contract to ARIS `/research-lit`).
+- **SOURCES = available** — Probe host/tool/API availability before claiming a source. Local PDFs and direct official proceedings/spec URLs are the standalone baseline. Zotero/Obsidian/S2/OpenAlex and other connectors are optional capabilities, not bundled adapters. Record actual queries, returned URLs, retrieval dates, read sections, failures/rate limits and any fallback in LIT_SOURCES.json. If a closest paper/spec cannot be read, mark that evidence unresolved; never invent its contents or a novelty conclusion.
 - **COMPOSED_TARGET** — When invoked with `— composed: idea-stage/IDEA_REPORT.md`, fold output directly into the `## Literature Landscape` (`#literature-landscape`) section of `idea-stage/IDEA_REPORT.md` instead of emitting a standalone file.
 
 ---

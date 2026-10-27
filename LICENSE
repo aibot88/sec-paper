@@ -22,6 +22,7 @@ SOFTWARE.
 
 ---
 Acknowledgements & Upstream Lineage:
+Vendored ARIS code retains its upstream MIT copyright and permission notice in THIRD_PARTY_NOTICES.md.
 - Inspired by ARIS (Auto-claude-code-research-in-sleep) multi-agent research orchestration.
 - Incorporates security/privacy/crypto writing conventions and anti-pattern taxonomy inspired by euzun/security-paper-writing (MIT) and Orchestra-Research/AI-Research-SKILLs (MIT).
 - Incorporates systems-security primitive mapping insights and anti-stitching lessons analyzed from sys-intelligence/ai-writes-a-paper and foundational security evaluation literature (Klees et al., ACM CCS 2018; Güler et al., USENIX Security 2024; Doupé et al., USENIX Security 2012).
