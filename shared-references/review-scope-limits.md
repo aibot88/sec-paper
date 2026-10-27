@@ -1,5 +1,10 @@
 # Review Scope Limits — what a reviewer may propose
 
+> **sec-paper note.** Normative and fully applicable. Additional boundary:
+> reviewer outputs land as findings in `receipt.json` verdicts; a reviewer
+> may never be asked to edit files, produce the work under review, or supply
+> the pass/fail rubric retroactively.
+
 ARIS is a research-workflow tool. Its reviewers exist to find what is **actually
 wrong**, not to harden a codebase against what is not happening.
 

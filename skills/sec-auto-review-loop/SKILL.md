@@ -93,7 +93,9 @@ Executor implements the fixes in weakness order:
 
 ### Phase 3: Re-Review & Iterate
 
-Warm repair checks may use review.py --continue-from, preserving objections. Before STOP obtain a NEW-session Gemini verdict on the final audited results/claims; only this fresh positive receipt accepts the phase. Append actual raw trace and receipt to ACQUITTAL_LOG and persist REVIEW_STATE. Repeat until:
+Warm repair checks may use review.py --continue-from, preserving objections. Before STOP obtain a NEW-session Gemini verdict on the final audited results/claims; only this fresh positive receipt accepts the phase. Append actual raw trace and receipt to ACQUITTAL_LOG and persist REVIEW_STATE.
+
+Maintain `review-stage/REVIEWER_MEMORY.md` in ALL rounds/modes (see `shared-references/workflow-contract.md` §S1.5/S2): after every review, append the reviewer's raw response tail plus its "Memory update" section before writing REVIEW_STATE. Prepend the full memory file to every repair-check prompt under `## Your Reviewer Memory (persistent across rounds)` — warm threads can die; the file is the durable objection ledger. In `hard`/`nightmare` difficulty additionally run the debate protocol: the reviewer must explicitly mark each prior objection as *fixed / sidestepped / still-open*; nightmare adds a fresh adversarial pass that verifies claims against code/logs/result files directly rather than executor summaries. Repeat until:
 - `STOP` with all hard gates green and score ≥ `STOP_SCORE` → write verdict, exit.
 - `MAX_ROUNDS` reached → write the final assessment **with unresolved weaknesses listed** — never report a timed-out loop as "passed".
 - The same weakness recurs for 2 consecutive rounds → escalate to `pivot` recommendation instead of a fifth identical fix.

@@ -17,7 +17,27 @@ mechanism. See THIRD_PARTY_NOTICES for the earlier unpinned import history.
 | narrative/claims/writing handoff | final evidence/claims snapshot, NARRATIVE_REPORT and fact pack; unresolved/max-round work is status only |
 | plan/figure/write/compile/improve | owned agent-executed W3 specification; real latexmk and PDF inspectors, no generic ARIS Skill dependency |
 | mandatory submission audits and freshness verifier | sec-paper-audit: five fresh Gemini audits; paper_check.py + submission_gate.py on the unchanged final bundle |
-| release/runtime tests | unittest suite for bridge failures, local jobs, state/gates/install, stale receipts and real PDF compilation when tools exist |
+| deterministic evidence existence pre-check | tools/evidence_check.py (vendored, unmodified) wired into sec-result-to-claim + sec-experiment-audit + workflow contract |
+| output manifest / language / versioning / composition | shared-references/output-{manifest,language,versioning,composition}.md, wired via workflow-contract.md §Output protocols |
+| review tracing | review-tracing.md maps onto review.py raw.json + receipt.json per call (full prompt/response, hash-bound) |
+| injection hygiene | workflow-contract.md §Output protocols + sec-idea-creator: threat_scan.py --scope strict on every re-ingested non-executor text |
+| watchdog + iteration stall log | vendored tools, wired in sec-research-pipeline Stage 0 + contract §Loop maintenance |
+| reviewer memory across rounds | REVIEWER_MEMORY.md in sec-auto-review-loop (all modes) + contract §S1.5/S2 — durable objection ledger vs. ephemeral warm threads |
+| wiki/helper resolution | wiki-helper-resolution.md: resolve repo via .aris/sec-paper.json or real skill path; wiki non-blocking, scanned content blocking |
+| integration contract (engineered handoffs) | integration-contract.md — artifact + shape check + deterministic gate + failure route + version binding |
+| score calibration anchors | taste-calibration.md cited by sec-research-refine (+ review-loop score gate) |
+| fan-out pattern | fan-out-pattern.md — generation may shard; acceptance stays fresh-Gemini; fetched content scanned |
+| release/runtime tests | unittest suite for bridge failures, local jobs, state/gates/install, stale receipts, contract coverage and real PDF compilation when tools exist |
+
+### Deliberately not ported (scoped out, not oversights)
+
+| Upstream contract/skill | Why out of scope |
+|---|---|
+| `compute-env-contract` (env spec + hash ledger + validation ladder) | Local POSIX backend only; reproducible-environment fidelity for remote/GPU targets returns with a real backend adapter. Documented as deferred, not silently absent. |
+| `AGENTS.md` pipeline-status dashboard (`language:` flag, stage table) | `.aris/context.json` + `MANIFEST.md` + `REVIEW_STATE.json` carry the same state machine-readable; language flag supported via context.json. |
+| Post-submission skills (`rebuttal`, `resubmit-pipeline`, `paper-talk`, posters/slides) | Intentionally left to the ARIS generic layer — out of the idea→submission scope. |
+| Rendering (`render-html`), grant/patent tracks, ML-interview tooling | Optional cosmetics / different domains; never load-bearing for a security submission. |
+| `verify_paper_audits.sh` name | Equivalent is `tools/submission_gate.py` (fail-closed, receipt + snapshot bound). |
 
 ## Explicit boundaries (not concealed fallbacks)
 

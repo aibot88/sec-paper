@@ -1,5 +1,14 @@
 # Resumable Runs
 
+> **sec-paper note (upstream-vendored, partially superseded).** sec-paper's
+> `run_state.py` diverges from the semantics below: `--provisional-advances`
+> and `mark_provisional` are **rejected**, `skipped` is legal only for a
+> disabled `sec-paper-writing`, execution phases complete on non-empty
+> artifacts, and review phases terminate only on a fresh Gemini receipt that
+> still validates against current inputs. Authoritative lifecycle:
+> [workflow-contract.md](workflow-contract.md) §"Run namespaces and
+> completion". The status taxonomy and lock mechanics below still apply.
+
 > **Codex mirror adaptation (normative).** Start Codex runs with
 > `run_state.py start ... --executor codex`. A fresh same-family Codex reviewer
 > records `mark-provisional`, which may close the phase for resume ONLY under

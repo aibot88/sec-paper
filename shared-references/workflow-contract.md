@@ -49,7 +49,58 @@ labels alone. Re-entering an accepted phase invalidates later acceptances.
 `skipped` is legal only for disabled optional writing. An old run with weaker
 receipts must be revalidated, never silently upgraded.
 
+## Output protocols (apply to every stage)
+
+- **Manifest** — append every produced artifact to `MANIFEST.md`
+  (output-manifest.md). Receipt-bearing artifacts are mandatory rows.
+- **Language** — localize report prose per output-language.md; file names,
+  JSON fields, verdict tokens, and venue LaTeX stay canonical.
+- **Versioning** — overwriting an existing deliverable writes a timestamped
+  copy plus the fixed-name latest (output-versioning.md). Overwriting a
+  reviewed artifact invalidates its receipt; re-review the new content.
+- **Composition** — inside a pipeline a child writes only its owned sections
+  of the shared deliverable; standalone runs write all documented outputs
+  (output-composition.md).
+- **Tracing** — every `review.py` call already emits `raw.json` +
+  `receipt.json`; never delete or summarize-away traces (review-tracing.md).
+- **Injection hygiene** — any content re-ingested into context that did not
+  originate from the executor (query_pack/wiki nodes, fetched abstracts,
+  advisories/spec text, REF_PAPER text, external review bodies) first passes
+  `tools/threat_scan.py --scope strict`. A scanner-clean result enables
+  ingestion; it is not a semantic review substitute.
+- **Handoffs** — cross-skill coupling needs artifact + shape check +
+  deterministic gate + explicit failure route + version binding
+  (integration-contract.md).
+- **Fan-out** — generation may shard across worker contexts; scoring and
+  acceptance never delegate to a producer shard (fan-out-pattern.md).
+- **Calibration** — reviewer scores use the anchored scale in
+  taste-calibration.md; off-anchor scores must name the justifying element.
+
+## Loop maintenance (watchdog + iteration log)
+
+For unattended loops (`sec-auto-review-loop`, multi-wave job queues):
+
+```bash
+python3 "$SEC_PAPER/tools/watchdog.py" --register \
+  '{"name":"<run_id>","type":"loop","state_file":"review-stage/REVIEW_STATE.json","stale_after_seconds":1800}'
+python3 "$SEC_PAPER/tools/iteration_log.py" note "$PROJECT" "$RUN" "$PHASE" <new-finding-count>
+python3 "$SEC_PAPER/tools/watchdog.py" --unregister "<run_id>"   # on completion
+```
+
+(`type:"loop"` registration requires `state_file` + `stale_after_seconds` —
+`session` is only valid for `training`/`download` tasks.)
+
+Touch run state at each tick; an `iteration_log` stall verdict means escalate
+(a genuinely different approach or a human decision), never auto-retry the
+same failing round. Watchdog registration is crash-observability, not a
+substitute for the locked worker lifecycle in jobs.py.
+
 ## S1: constraints -> literature -> ideas -> novelty -> review -> refine+plan
+
+Phase 0 also produces `idea-stage/REF_PAPER_SUMMARY.md` when REF_PAPER is
+set (mechanism, threat model, oracle, results, limitations, improvement
+directions) — threat-scanned before use, and included as generation context
+in research-lit + idea-creator. Its absence must be explicit, not silent.
 
 Keep a shared IDEA_REPORT; each child updates only its owned sections and
 preserves earlier sections and failed candidates. No child may overwrite the
@@ -86,6 +137,12 @@ sec-ablation-planner (if supported/partial) -> run ablations -> new audit +
 claim routing -> final results. Initial claims may be provisional engineering
 notes only; unaudited data never becomes a paper claim.
 
+Before ANY semantic claim/audit call, run the deterministic pre-check
+(`tools/evidence_check.py`, batch mode) over each claim's (value, source)
+pairs — evidence-precheck.md. `verified` is existence only; support stays
+with the Gemini jury. `path_missing`/`value_not_found` enter the reviewer
+prompt as findings.
+
 Every changed evidence batch invalidates older AUDIT_PASS and claim judgments.
 Auto-review repair rounds must re-run audit/routing before re-review. The
 final fresh Gemini verdict must read the latest audited snapshot. Repeated
@@ -102,6 +159,15 @@ Append one row per returned review to `review-stage/ACQUITTAL_LOG.jsonl`
 (run_id, round, phase, raw_trace, receipt, decision, accepted); never replace
 old rows. A crash resumes from the first unfinished action; it never reruns
 an already-running job under a new ID.
+
+Maintain `review-stage/REVIEWER_MEMORY.md` across ALL rounds and difficulty
+modes: append each reviewer's raw response tail plus a "Memory update"
+(suspicions confirmed / sidestepped / resolved) BEFORE writing REVIEW_STATE.
+Warm `--continue-from` threads can die; the memory file is the durable
+objection ledger — prepend it to every repair-check prompt under
+`## Your Reviewer Memory (persistent across rounds)` so a restarted thread
+still sees prior objections. It never substitutes for the fresh final
+acceptance session.
 
 ## Standalone run/monitor/queue lifecycle
 

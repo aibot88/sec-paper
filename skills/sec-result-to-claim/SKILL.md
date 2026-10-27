@@ -8,7 +8,7 @@ argument-hint: "[RESULT_TO_CLAIM.md-or-results-path]"
 
 Route experimental evidence to claim status for: **$ARGUMENTS**
 
-Read shared-references/workflow-contract.md. Codex assembles raw evidence and the table; a fresh AntiGravity/Gemini review via tools/review.py adjudicates the claim statuses against the research contract and actual logs. Save the positive/negative receipt and raw trace; only current AUDIT_PASS evidence is admissible. No self-generated claims table counts as independent adjudication. Revalidate after new data or scope changes.
+Read shared-references/workflow-contract.md. Before the semantic call, run the deterministic pre-check: `tools/evidence_check.py <project> --batch claims.json --numeric-only` over every (value, source) pair cited in the table — `path_missing`/`value_not_found` go into the reviewer prompt as findings; `skipped_non_numeric` qualitative claims go straight to the jury (existence verified here; support judged there). Codex assembles raw evidence and the table; a fresh AntiGravity/Gemini review via tools/review.py adjudicates the claim statuses against the research contract and actual logs. Save the positive/negative receipt and raw trace; only current AUDIT_PASS evidence is admissible. No self-generated claims table counts as independent adjudication. Revalidate after new data or scope changes.
 
 ---
 

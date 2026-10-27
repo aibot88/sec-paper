@@ -1,5 +1,13 @@
 # Venue Checklists for ICLR, NeurIPS, and ICML
 
+> **sec-paper note (upstream-vendored, ML venues only).** These checklists
+> target ICLR/NeurIPS/ICML and do NOT cover Big-Four security venues. For
+> USENIX Security / IEEE S&P / CCS / NDSS use
+> `references/venues-and-ethics-2026.md` plus a **cycle-verified**
+> `paper/venue-policy.json` (templates/VENUE_POLICY_TEMPLATE.json +
+> tools/paper_check.py) — the official CFP of the target cycle is
+> authoritative, this file is not.
+
 Use this reference near the end of `paper-plan` and during the final checks in `paper-write`.
 
 ## When to Read

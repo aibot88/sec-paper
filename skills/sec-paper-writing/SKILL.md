@@ -38,7 +38,7 @@ Draft and audit a publication-ready security manuscript for: **$ARGUMENTS**
 
 ## Internal Orchestration (W3 Sub-Chain)
 
-This is a standalone W3 workflow. Codex performs the following stages directly; no ARIS Skills are required. Read shared-references/workflow-contract.md and preserve its actual-Gemini/freshness rules:
+This is a standalone W3 workflow. Codex performs the following stages directly; no ARIS Skills are required. Read shared-references/workflow-contract.md and preserve its actual-Gemini/freshness rules. All produced artifacts get MANIFEST.md rows (output-manifest.md); regenerated drafts keep timestamped copies (output-versioning.md); report prose follows output-language.md while venue LaTeX stays in the venue language:
 
 ```text
 NARRATIVE_REPORT + FACT_PACK + final claim/evidence receipts

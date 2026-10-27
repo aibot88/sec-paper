@@ -1,5 +1,15 @@
 # Selectable Reviewers
 
+> **sec-paper note (upstream-vendored, superseded).** This document is the
+> upstream ARIS contract for *selectable* reviewer backends (Codex default,
+> Claude, Grok, antigravity...). sec-paper hard-pins a single route:
+> **Codex executes, AntiGravity/Gemini reviews** — see
+> [reviewer-contract.md](reviewer-contract.md) and
+> [reviewer-routing.md](reviewer-routing.md). Where this file describes
+> backend choice or a Codex reviewer default, it is background only; the
+> secured contract wins on any conflict. Same-family provisional review is
+> disabled (`run_state.py mark_provisional` raises).
+
 The complete Claude Code and Codex skill packs share this selection contract.
 It changes the reviewer transport at an existing review step, preserving the
 step's prompt, evidence, fresh-context requirements, rebuttal, and verdict schema.

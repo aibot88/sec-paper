@@ -1,5 +1,11 @@
 # Experiment Integrity Protocol
 
+> **sec-paper note.** Normative and fully applicable — enforced by
+> `sec-experiment-audit` (fresh Gemini) plus the deterministic layer
+> (`evidence_check.py` existence, receipt input snapshots). The "model that
+> writes must not judge" rule maps to: Codex writes, Gemini audits; no
+> same-family provisional path exists here.
+
 ## Core Principle
 
 **The model that writes experiment code must NOT be the model that judges experiment integrity.** This is the same principle as reviewer-independence, applied to experiments.

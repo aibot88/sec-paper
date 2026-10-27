@@ -114,6 +114,11 @@ Read the proposal file directly. Score 1-10 on:
 6. Frontier leverage — is the mechanism the simplest adequate one, and does it
    use modern tooling (LLM agents, learned oracles) only where it genuinely fits?
 
+Score against the anchored 1–10 scale in `shared-references/taste-calibration.md`;
+a score more than ±1 from an anchor description must name the element that
+justifies the deviation. Dimensions not evaluable from the inputs are
+findings, not skipped.
+
 Return: per-dimension scores, OVERALL SCORE, verdict (ACCEPT >= threshold |
 REVISE), and the top 3 concrete weaknesses with the cheapest fix for each.
 ```

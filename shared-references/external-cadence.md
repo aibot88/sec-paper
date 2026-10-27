@@ -1,5 +1,13 @@
 # External Cadence
 
+> **sec-paper note (upstream-vendored, partially superseded).** The fire-
+> control purpose stands (watchdog/interruption handling for long loops), but
+> the "default fresh Codex reviewer / provisional stop-continue" language is
+> obsolete: stop/continue inside `sec-auto-review-loop` is decided by
+> AntiGravity/Gemini per reviewer-contract.md. Loop registration and stall
+> detection use this repo's `tools/watchdog.py` + `tools/iteration_log.py`
+> (wired in workflow-contract.md §"Loop maintenance").
+
 > **Codex mirror adaptation (normative).** External cadence remains fire-control
 > only. The default fresh Codex reviewer may produce a provisional stop/continue
 > decision. Resolve other routes through

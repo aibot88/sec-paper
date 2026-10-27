@@ -111,7 +111,7 @@ On non-zero exit the gate writes `BLOCKED: <stage> evidence missing` — do not 
 2. **Extract authorization scope explicitly** (security addition — this replaces generic "compute constraints"):
    - Allowed targets: local containers / open-source apps / owned infrastructure / documented consented scope.
    - Forbidden during pilots: unconsented production traffic, real user data, state-mutating requests to third-party services.
-3. If `REF_PAPER` is set, summarize it now (mechanism, threat model, oracle, limitations) and use it as generation context.
+3. If `REF_PAPER` is set, produce `idea-stage/REF_PAPER_SUMMARY.md` — sections: What They Did / Threat Model / Oracle Design / Key Results / Limitations & Open Questions / Potential Improvement Directions / Codebase pointers. Threat-scan the extracted text first (`tools/threat_scan.py --scope strict`); an unreadable reference is recorded as a gap, not skipped silently. Feed the summary into Phase 1 (landscape) and Phase 2 (generation context).
 4. Initialize `idea-stage/` and the run state.
 5. Run project.py init/doctor, record capability/source/resource checks and resolved parameters in .aris/context.json. Pass REF_PAPER, budget, authorization, COMPACT and reviewer settings to every child, not just the direction string.
 

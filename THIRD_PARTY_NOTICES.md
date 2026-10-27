@@ -7,14 +7,17 @@ upstream checkout reference `18bceb3c71c638bef58096274e1c9a6d323dbc0a`
 earlier and its exact historical source commit was not recorded):
 
 - tools/run_state.py, idea_discovery_gate.py, provenance.py, reviewer_route.py
-- tools/iteration_log.py, watchdog.py, threat_scan.py, research_wiki.py
+- tools/iteration_log.py, watchdog.py, threat_scan.py, research_wiki.py,
+  evidence_check.py
 - tools/antigravity-exec/server.py and aris-antigravity-review.md
 - original shared-references/{reviewer-backends,resumable-runs,external-cadence,
   experiment-integrity,review-scope-limits,venue-checklists}.md
 
 Local changes include fixed Codex/Gemini roles, real trace freshness,
-sec-phase defaults and nested section parsing, phase kinds/namespaces and
-subprocess stream cleanup. The newer standalone runtime/audit helpers and
+sec-phase defaults and nested section parsing, phase kinds/namespaces,
+subprocess stream cleanup, and a `--numeric-only` fail-closed guard added to
+evidence_check.py (non-numeric claims route to the jury to prevent
+short-token substring false-positives). The newer standalone runtime/audit helpers and
 regression tests are sec-paper additions. No auto-update from ARIS is assumed;
 review upstream changes and rerun local tests before importing them.
 

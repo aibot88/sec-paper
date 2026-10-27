@@ -73,6 +73,8 @@ sec-idea-discovery,sec-experiment-bridge,sec-experiment-audit,sec-auto-review-lo
 1. Run tools/project.py init and doctor --live for the target project, record capability/resource checks and .aris/context.json. Create run state with actual Codex identity and --auto-write only if requested. Missing owned state tools or reviewer blocks, never warn-and-skip.
 2. Extract direction, authorization scope, venue hint, and any `RESEARCH_BRIEF.md`.
 3. Record the authorization scope where every downstream stage can read it — it is a **pipeline-wide invariant**, not per-stage decoration.
+4. Register the run with `tools/watchdog.py --register '{"name":"<run>","type":"loop","state_file":".aris/runs/<run>.json","stale_after_seconds":1800}'` (loop tasks require state_file + stale_after_seconds) and `--unregister` on completion; after each stage boundary append `tools/iteration_log.py note <project> <run> <stage> <new-finding-count>` — stall verdicts escalate to a real pivot/human decision, never a blind retry. See `shared-references/workflow-contract.md` §Loop maintenance.
+5. Maintain `MANIFEST.md` per `shared-references/output-manifest.md` — every stage output gets a row.
 
 ### Stage 1: Idea Discovery — `/sec-idea-discovery`
 

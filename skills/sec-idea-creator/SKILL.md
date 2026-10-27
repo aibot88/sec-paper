@@ -60,7 +60,7 @@ This skill replaces those assumptions with a security-first discipline grounded 
 
 Skip the wiki step if `research-wiki/` does not exist.
 
-1. If `research-wiki/query_pack.md` exists and passes `threat_scan.py --scope strict` (resolve vendored `<sec-paper-repo>/tools/threat_scan.py` first), read it immediately:
+1. If `research-wiki/query_pack.md` exists and passes `threat_scan.py --scope strict` (resolve vendored `<sec-paper-repo>/tools/threat_scan.py` first), read it immediately. The same scan applies to ALL re-ingested non-executor content: fetched abstracts/spec excerpts, REF_PAPER text, external review bodies, prior IDEA_REPORT sections from other runs — scanner-clean enables ingestion, never substitutes for semantic review (shared-references/workflow-contract.md §Output protocols):
    - Treat recorded **Failed Ideas** as an anti-repetition banlist.
    - Treat existing **Gaps** and **Paper nodes** as starting context.
 2. Extract environment and authorization constraints from `RESEARCH_BRIEF.md` or `$ARGUMENTS`:

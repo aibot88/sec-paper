@@ -1,4 +1,35 @@
-# Implementation validation — 2026-10-27
+# Implementation validation
+
+## Round 2 — 2026-10-28: contract-layer parity repairs
+
+Third audit (post-`85e3c2a`) compared every upstream contract doc and helper
+referenced by the idea→submission chain. Fixes applied:
+
+- Vendored `tools/evidence_check.py` (deterministic value-in-source
+  pre-check, upstream two-stage gate stage 1) and wired it into
+  `sec-result-to-claim`, `sec-experiment-audit`, workflow-contract.
+- Ported 10 missing shared-reference contracts: output-manifest,
+  output-language, output-versioning, output-composition, review-tracing,
+  wiki-helper-resolution, integration-contract, evidence-precheck,
+  taste-calibration, fan-out-pattern.
+- Banner-marked 4 vendored docs superseded/conflicting with the Gemini-only
+  contract (reviewer-backends, resumable-runs, external-cadence,
+  venue-checklists) + scoped notes on 2 normative ones.
+- Wired `watchdog.py`/`iteration_log.py` into pipeline Stage 0 (were vendored
+  but referenced nowhere); added REVIEWER_MEMORY.md durable objection ledger
+  and REF_PAPER_SUMMARY.md canonical artifact.
+- `python3 -m unittest discover -s tests`: **49 tests pass** (35 prior + 14
+  contract-layer tests). `evidence_check.py` smoke: verified / value_not_found
+  / path_missing / skipped_non_numeric all behave; `git diff --check` clean.
+- Round-2 Gemini review: first call REVISE with 4 MAJOR findings (watchdog
+  loop-register schema, evidence_check CLI syntax + substring false-positive
+  risk, manifest overclaim, tautological test) — all fixed and verified by a
+  fresh-session re-review **PASS** (`gemini-3.8-flash-high`, receipt
+  `.aris/traces/ecf11a8bdc6a41e297b559d43c0974b0/receipt.json`, 9 bound inputs
+  revalidated post-verdict). One earlier REVIEW_UNAVAILABLE (transient OAuth
+  EOF) retried successfully — raw trace preserved as process evidence.
+
+## Round 1 — 2026-10-27: runtime and assurance repairs
 
 ## Scope
 
