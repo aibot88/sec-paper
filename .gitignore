@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime state (per-project, do not commit)
+.aris/runs/
+.aris/traces/
+research-wiki/
+idea-stage/
+refine-logs/
+review-stage/
+results/
+
+# Local env
+.env
