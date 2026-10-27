@@ -154,12 +154,9 @@ Hard constraints on brainstorming:
 
 ### Phase 4: Fresh-Context Adversarial Triage & Root-Cause Novelty Check
 
-**CRITICAL:** Open a **fresh** reviewer session/thread (never reuse Phase 2's `threadId`). Pass only the consolidated candidate cards and Phase 1–3 evidence notes.
+**CRITICAL:** Open a **fresh** reviewer session/thread (never reuse Phase 2's `threadId`). Pass only the consolidated candidate cards and Phase 1–3 evidence notes. Run the steps in this exact order so the fast cross-model triage gates the expensive multi-source `/novelty-check`:
 
-1. **Root-cause novelty check (`/novelty-check`)**:
-   - Verify whether the **mechanism and broken invariant** (not just the target product name) already appear in S&P/USENIX/CCS/NDSS/WWW/ICSE papers, RFCs, or public vulnerability writeups.
-   - Finding a known vulnerability class in one more web app is a bug report, not a research paper — unless the candidate demonstrates a **new root-cause mechanism, a systematic cross-framework blind spot, or a generalizable detection/defense principle**.
-2. **Fresh-context adversarial review**:
+1. **Step 4.1 — Fresh-context adversarial triage (Reviewer 排序初筛)**:
 
 ```text
 Read the candidate set below cold. You did NOT generate these ideas.
@@ -182,8 +179,15 @@ For each candidate, audit strictly against security reviewing standards:
      `Original Claim -> Revised Threat Precondition -> New Discriminating Pilot`.
    - Forbid stealth scope-shrinking that hides a refutation.
 
-Rank the candidates by expected scientific information gained per unit of pilot effort, and select 2-3 for Phase 5 pilots.
+Rank all feasible candidates by expected scientific information gained per unit of pilot effort, and shortlist the top 3-4 candidates for deep root-cause novelty verification.
 ```
+
+2. **Step 4.2 — Root-cause novelty check (`/novelty-check` on top shortlist)**:
+   - Invoke `/novelty-check` on each shortlisted candidate from Step 4.1.
+   - Verify whether the **mechanism and broken invariant** (not just the target product name) already appear in S&P/USENIX/CCS/NDSS/WWW/ICSE papers, RFCs, or public vulnerability writeups.
+   - Finding a known vulnerability class in one more web app is a bug report, not a research paper — unless the candidate demonstrates a **new root-cause mechanism, a systematic cross-framework blind spot, or a generalizable detection/defense principle**.
+3. **Step 4.3 — Select Pilot Slate (Top 2–3)**:
+   - Combine the fresh-context reviewer ranking with `/novelty-check` verdicts and select the top `MAX_PILOT_IDEAS` (2–3) surviving candidates for Phase 5 pilots. Keep unselected feasible candidates recorded as `DEFERRED_BUDGET`.
 
 ---
 
@@ -215,13 +219,35 @@ For each selected candidate, write down:
 | **Defense / Detection** | (1) Blocks/detects known true positives, (2) preserves benign workflows (false-positive check), (3) survives at least one **A3 adaptive bypass probe** aimed at its core mechanism, and (4) reports runtime/deployment overhead. | High F1 on a synthetic dataset where ground truth comes from another scanner; beating only a strawman baseline with no adaptive attacker test. |
 | **Measurement / Diagnostic** | Well-defined sampling frame and denominator, validated measurement oracle on a manually audited subset (precision/blind-spot check), and a non-trivial finding that changes how the community understands the threat or defense. | Scraping N websites/repos and reporting unverified scanner hits as "X% of the Web is vulnerable." |
 
-#### Step 5.3 — Four-State Pilot Verdict (Replacing Binary `POSITIVE / NEGATIVE`)
+#### Step 5.3 — Deploy Parallel Pilots (`/run-experiment`)
+Invoke `/run-experiment` to launch the 2–3 isolated pilot harnesses in parallel (e.g., separate Docker Compose stacks, namespaces, browser contexts, or worker nodes):
 
-Classify each completed pilot into one of four states:
-- **`SUPPORTED`**: pilot confirms the causal mechanism and satisfies the track's minimum evidence bar.
-- **`REFUTED`**: controlled experiment falsifies the core hypothesis. Document whether this yields a **publishable negative/diagnostic finding** (e.g., proving a widely assumed attack/defense premise false under realistic conditions) or a dead end to archive.
-- **`UNDERPOWERED_OR_BLIND`**: harness failed to reach target state, sample was too small, or oracle was too noisy to decide. Only allocate one more pilot iteration if the specific blindness can be fixed cheaply.
-- **`BLOCKED_ETHICS_OR_ENV`**: cannot proceed safely/legally in the current environment; requires local reproduction or scope change.
+```text
+/run-experiment [Pilot 1 harness command — isolated target/port/container]
+/run-experiment [Pilot 2 harness command — isolated target/port/container]
+/run-experiment [Pilot 3 harness command — isolated target/port/container]
+```
+
+Ensure strict state isolation between concurrent pilots (never run two stateful Web scanners against the same mutable database instance at the same time).
+
+#### Step 5.4 — Monitor & Collect Evidence (`/monitor-experiment`)
+Use `/monitor-experiment` to track pilot progress, enforce wall-clock budgets, and collect structured artifacts (state diffs, reproduction traces, false-positive logs, timing/overhead metrics):
+
+```text
+/monitor-experiment [session-or-target]
+```
+
+If a pilot exceeds its declared timeout without reaching the target state, stop it and record the truncated observation as `UNDERPOWERED_OR_BLIND` rather than silently fabricating a negative verdict.
+
+#### Step 5.5 — Four-State Pilot Verdict & Evidence-Based Re-Ranking
+1. **Assign a four-state verdict** to each completed pilot (replacing binary `POSITIVE / NEGATIVE`):
+   - **`SUPPORTED`**: pilot confirms the causal mechanism and satisfies the track's minimum evidence bar.
+   - **`REFUTED`**: controlled experiment falsifies the core hypothesis. Document whether this yields a **publishable negative/diagnostic finding** (e.g., proving a widely assumed attack/defense premise false under realistic conditions) or a dead end to archive.
+   - **`UNDERPOWERED_OR_BLIND`**: harness failed to reach target state, sample was too small, or oracle was too noisy to decide. Only allocate one more pilot iteration if the specific blindness can be fixed cheaply.
+   - **`BLOCKED_ETHICS_OR_ENV`**: cannot proceed safely/legally in the current environment; requires local reproduction or scope change.
+2. **Re-rank candidates based on empirical/formal evidence**:
+   - Update the candidate ranking using verified pilot outcomes and information gain.
+   - A candidate with a clean, oracle-verified reproduction (`SUPPORTED`) or a high-value diagnostic refutation outranks a theoretically appealing idea whose pilot remained `UNDERPOWERED_OR_BLIND`.
 
 ---
 
