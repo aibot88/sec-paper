@@ -61,7 +61,15 @@ Resolve `AUTO_PROCEED` once before Phase 0 and keep it for the whole run.
 
 ## Per-Stage Evidence Gate (`RESUMABLE = true`)
 
-Resolve `run_state.py` and `idea_discovery_gate.py` (ARIS manifest resolver, same pattern as `/idea-discovery`). If either helper is unavailable the final report is `BLOCKED` — never silently continue without a state record.
+Resolve `run_state.py` and `idea_discovery_gate.py` in this order:
+1. `<sec-paper-repo>/tools/run_state.py` (vendored copy — this repo ships it)
+2. `tools/run_state.py` in the project directory
+3. `tools/run_state.py` under a configured ARIS repo, if present
+
+Same order for `idea_discovery_gate.py` (the vendored edition defaults to
+the `sec-*` stage names and accepts `--phases`/`--review-phases` overrides).
+If neither helper is resolvable the final report is `BLOCKED` — never
+silently continue without a state record.
 
 For a new run, derive `<run_id>` from direction slug + date, then start the ordered record with `--executor <actual-model> --provisional-advances`:
 
@@ -90,6 +98,9 @@ At the end run:
 ```text
 python3 <resolved-idea_discovery_gate.py> . <run_id> --report idea-stage/IDEA_REPORT.md
 ```
+
+(The vendored gate already defaults to the `sec-*` phase list; pass
+`--phases`/`--review-phases` only for a differently-named chain.)
 
 On non-zero exit the gate writes `BLOCKED: <stage> evidence missing` — do not present the workflow as complete. On `— resume <run_id>`, start from the first non-terminal phase and re-run the gate.
 

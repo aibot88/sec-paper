@@ -48,7 +48,7 @@ Identical to `/sec-idea-discovery`: resolve `AUTO_PROCEED` once, keep for the wh
 
 ## Resumable Runs
 
-Same helper-resolution pattern as `/sec-idea-discovery` (`run_state.py`, `watchdog.py`, `iteration_log.py` via manifest or `tools/`). Stage list for `run_state start`:
+Same helper-resolution pattern as `/sec-idea-discovery`: prefer the vendored copies under `<sec-paper-repo>/tools/` (`run_state.py`, `watchdog.py`, `iteration_log.py`), then project `tools/`, then a configured ARIS repo. Stage list for `run_state start`:
 
 ```text
 sec-idea-discovery,sec-experiment-bridge,sec-experiment-audit,sec-auto-review-loop,summary,sec-paper-writing

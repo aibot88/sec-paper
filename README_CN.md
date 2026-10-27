@@ -48,6 +48,18 @@
 
 ---
 
+## 独立运行说明（不依赖 ARIS）
+
+`sec-paper` 是**自包含**项目：`tools/` 下 vendor 了运行所需的全部确定性工具——`run_state.py`（断点续跑状态）、`idea_discovery_gate.py`（已参数化为 `sec-*` 阶段名，支持 `--phases`/`--review-phases` 覆盖）、`reviewer_route.py`（审稿后端解析）、`threat_scan.py`、`research_wiki.py`、`antigravity-exec/server.py`（本机 `agy` 审稿桥）。
+
+审稿后端配置（每个项目一次，Codex 执行 × AntiGravity/Gemini 审稿 → 跨家族 `accept` 回执）：
+
+```bash
+cp /Users/aibot/script/sec-paper/.aris/reviewer.example.json <项目>/.aris/reviewer.json
+```
+
+可选集成（存在即用，缺失自动降级）：ARIS 的 `/run-experiment` `/experiment-queue` `/monitor-experiment`（执行原语——sec-paper 内嵌等价契约）、`/paper-plan` `/paper-write` `/paper-figure` `/paper-compile` 等写作侧通用件（缺失时按内置骨架与 `latexmk` 兜底）、`/render-html`、`research-wiki`。
+
 ## 一键安装与使用（不污染上游 ARIS 仓库）
 
 ```bash

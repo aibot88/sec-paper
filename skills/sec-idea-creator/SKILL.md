@@ -60,7 +60,7 @@ This skill replaces those assumptions with a security-first discipline grounded 
 
 Skip the wiki step if `research-wiki/` does not exist.
 
-1. If `research-wiki/query_pack.md` exists and passes `threat_scan.py --scope strict`, read it immediately:
+1. If `research-wiki/query_pack.md` exists and passes `threat_scan.py --scope strict` (resolve vendored `<sec-paper-repo>/tools/threat_scan.py` first), read it immediately:
    - Treat recorded **Failed Ideas** as an anti-repetition banlist.
    - Treat existing **Gaps** and **Paper nodes** as starting context.
 2. Extract environment and authorization constraints from `RESEARCH_BRIEF.md` or `$ARGUMENTS`:
@@ -229,6 +229,11 @@ Invoke `/run-experiment` to launch the 2–3 isolated pilot harnesses in paralle
 ```
 
 Ensure strict state isolation between concurrent pilots (never run two stateful Web scanners against the same mutable database instance at the same time).
+
+> **Standalone note:** `/run-experiment` and `/monitor-experiment` are
+> host-provided primitives. Without them, execute the pilot harness commands
+> directly — same contract: isolated state, `results/<run_id>/` artifacts,
+> enforced budgets, truncated runs recorded as `UNDERPOWERED_OR_BLIND`.
 
 #### Step 5.4 — Monitor & Collect Evidence (`/monitor-experiment`)
 Use `/monitor-experiment` to track pilot progress, enforce wall-clock budgets, and collect structured artifacts (state diffs, reproduction traces, false-positive logs, timing/overhead metrics):

@@ -69,14 +69,46 @@ sec-paper/
 │   └── venues-and-ethics-2026.md             # S&P/USENIX'26/CCS/NDSS policies, 90-day disclosure, AE
 ├── templates/
 │   ├── SECURITY_IDEA_CARD_TEMPLATE.md        # 6-field candidate card + 4-state pilot decision
-│   └── FACT_PACK_AND_FORBIDDEN_CLAIMS_TEMPLATE.md
+│   ├── FACT_PACK_AND_FORBIDDEN_CLAIMS_TEMPLATE.md
+│   ├── RESEARCH_CONTRACT_TEMPLATE.md         # frozen anchors + falsifiable claims + migration log
+│   └── RESEARCH_BRIEF_TEMPLATE.md            # direction, venue, authorization scope (Phase 0 input)
+├── shared-references/                        # vendored ARIS contracts (standalone capable)
+│   ├── reviewer-contract.md                  # sec-paper edition: Codex executor × AntiGravity reviewer
+│   ├── reviewer-backends.md · resumable-runs.md · external-cadence.md
+│   └── experiment-integrity.md · review-scope-limits.md · venue-checklists.md
+├── .aris/
+│   └── reviewer.example.json                 # {"backend":"antigravity","model":"gemini-3.8-flash-high"}
 └── tools/
-    └── install_sec_paper.sh                  # Non-intrusive symlink installer for ARIS / Codex / OpenCode
+    ├── install_sec_paper.sh                  # symlink installer (project / codex / opencode targets)
+    ├── run_state.py                          # vendored: resumable run state
+    ├── idea_discovery_gate.py                # vendored + parameterized: sec-* phase evidence gate
+    ├── reviewer_route.py                     # vendored: .aris/reviewer.json resolver
+    ├── threat_scan.py · research_wiki.py · iteration_log.py · watchdog.py
+    └── antigravity-exec/server.py            # vendored: local agy reviewer bridge
 ```
 
 ---
 
-## Quick Start & Integration with ARIS
+## Quick Start
+
+`sec-paper` runs **standalone** — the repo vendors the deterministic helpers it
+needs (`tools/run_state.py`, `tools/idea_discovery_gate.py`, `tools/reviewer_route.py`,
+`tools/threat_scan.py`, `tools/research_wiki.py`, `tools/antigravity-exec/`).
+
+Set up the reviewer backend once per project (Codex executes, AntiGravity/Gemini reviews):
+
+```bash
+cp ~/script/sec-paper/.aris/reviewer.example.json <project>/.aris/reviewer.json
+# {"backend":"antigravity","model":"gemini-3.8-flash-high","effort":"high"}
+```
+
+Optional integrations (used when present, cleanly absent otherwise): ARIS
+`/run-experiment`, `/experiment-queue`, `/monitor-experiment` (execution
+primitives — sec-paper documents the contract and works without them),
+`/paper-plan` `/paper-write` `/paper-figure` `/paper-compile`
+`/paper-claim-audit` `/citation-audit` `/integrity-forensics` (writing-side
+helpers — sec-paper-writing falls back to inline equivalents), and
+`/render-html`, `research-wiki` (display/knowledge extras).
 
 ```bash
 git clone https://github.com/aibot88/sec-paper.git ~/script/sec-paper

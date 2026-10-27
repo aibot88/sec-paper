@@ -105,9 +105,18 @@ Run the smallest block end-to-end — typically oracle validation on 1–2 targe
 
 ### Phase 4: Deploy Full Experiments
 
-Auto-route by job count (same contract as upstream):
+Auto-route by job count:
 - **≤5 jobs** → `/run-experiment` per run.
 - **≥10 jobs or wave dependencies** (e.g., A1→A2→A3 tiers, baseline→ablation waves) → `/experiment-queue` with OOM/crash-safe state and wave gating.
+
+> **Standalone note (no ARIS skills installed):** `/run-experiment`,
+> `/experiment-queue`, and `/monitor-experiment` are host-provided execution
+> primitives. When they are absent, execute the harness commands directly —
+> the **contract** is what matters, not the launcher: (a) each run lands in
+> `results/<run_id>/` with config + target@SHA + oracle verdicts + timing;
+> (b) stateful runs never share a mutable target instance; (c) per-trial
+> seeds recorded; (d) budgets enforced and overruns marked
+> `UNDERPOWERED_OR_BLIND`.
 
 **Isolation invariants (security-specific, hard rules):**
 - Never run two stateful scanners against one mutable DB/app instance concurrently — separate containers, namespaces, or DB clones.
