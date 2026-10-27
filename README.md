@@ -2,7 +2,7 @@
 
 > **中文文档请参阅 [`README_CN.md`](README_CN.md)。**
 
-`sec-paper` is a standalone, composable skill suite for **cybersecurity, Web application security, and systems security** research — covering the **full idea-discovery arc** (`sec-idea-discovery` orchestrating `sec-research-lit → sec-idea-creator → sec-novelty-check → sec-research-review → sec-research-refine-pipeline`) through **Big-Four manuscript drafting and pre-submission auditing (`sec-paper-writing`)**.
+`sec-paper` is a standalone, composable skill suite for **cybersecurity, Web application security, and systems security** research — covering the **complete arc from a broad direction to a submission-ready manuscript**: `sec-research-pipeline` orchestrates `sec-idea-discovery` → `sec-experiment-bridge` → `sec-auto-review-loop` → narrative summary → `sec-paper-writing`.
 
 Target venues: **IEEE S&P (Oakland), USENIX Security, ACM CCS, NDSS**, as well as **PETS / PoPETs, ACSAC, AsiaCCS, and RAID**.
 
@@ -46,7 +46,8 @@ sec-paper/
 ├── README_CN.md
 ├── LICENSE
 ├── skills/
-│   ├── sec-idea-discovery/             # W1 orchestrator: lit → creator → novelty → review → refine-pipeline
+│   ├── sec-research-pipeline/          # W0 top orchestrator: discovery → bridge → review-loop → summary → writing
+│   ├── sec-idea-discovery/             # S1: lit → creator → novelty → review → refine-pipeline + evidence gate
 │   ├── sec-research-lit/               # Big-Four + RFC/CVE/commit-grounded literature & spec survey
 │   ├── sec-idea-creator/               # Ideation + 3-way status gate + oracle-backed pilots + 4-state verdicts
 │   ├── sec-novelty-check/              # Root-cause / trust-boundary novelty vs papers, RFCs, advisories
@@ -54,6 +55,8 @@ sec-paper/
 │   ├── sec-research-refine/            # Anchored method refinement (Problem + Threat-Model anchors)
 │   ├── sec-experiment-plan/            # Claim→evidence matrix, RQ1-RQ4 incl. mandatory A3, stats protocol
 │   ├── sec-research-refine-pipeline/   # One-shot refine → experiment-plan composition
+│   ├── sec-experiment-bridge/          # S1.5: harness+oracle+dedup+A3 impl → deploy → claims routing
+│   ├── sec-auto-review-loop/           # S2: hard-gated review→fix→re-review loop (5 security hard gates)
 │   └── sec-paper-writing/              # Big-Four manuscript scaffolding + pre-submission audit gate
 ├── references/
 │   ├── web-and-system-threat-models.md       # W1-W6 adversary classes, A1-A3 tiers, capability table
@@ -88,7 +91,10 @@ bash ~/script/sec-paper/tools/install_sec_paper.sh --codex
 ### Entry points
 
 ```text
-/sec-idea-discovery "direction"        # full pipeline: constraints → lit → candidates+pilots → novelty → review → refine+plan
+/sec-research-pipeline "direction"     # END-TO-END: idea → experiments → review → summary → paper (optional)
+/sec-idea-discovery "direction"        # S1: constraints → lit → candidates+pilots → novelty → review → refine+plan
+/sec-experiment-bridge "plan"          # S1.5: implement harness/oracle/A3 → deploy → oracle-verified results
+/sec-auto-review-loop "artifacts"      # S2: hard-gated review→fix loop until STOP / MAX_ROUNDS
 /sec-research-lit "topic"              # standalone security/spec literature survey
 /sec-idea-creator "direction"          # standalone ideation + oracle pilots
 /sec-novelty-check "claim"             # standalone root-cause novelty audit

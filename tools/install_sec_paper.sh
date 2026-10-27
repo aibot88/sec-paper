@@ -9,18 +9,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TARGET_DIR=""
-OVERRIDE_IDEA_CREATOR=false
+OVERRIDE_GENERIC=false
 
 usage() {
   cat <<'EOF'
 Usage:
-  bash tools/install_sec_paper.sh [--project <path> | --codex | --opencode] [--override-idea-creator]
+  bash tools/install_sec_paper.sh [--project <path> | --codex | --opencode] [--override-generic]
 
 Options:
   --project <path>          Link skills into <path>/.agents/skills/
   --codex                   Link skills into ~/.codex/skills/
   --opencode                Link skills into ~/.config/opencode/skills/
-  --override-idea-creator   Also link idea-creator -> sec-idea-creator in the target skill dir
+  --override-generic        Route generic entry points to security variants in the
+                            target skill dir: idea-creator, idea-discovery,
+                            research-pipeline -> sec-* equivalents
+                            (alias: --override-idea-creator)
 EOF
 }
 
@@ -38,8 +41,8 @@ while [[ $# -gt 0 ]]; do
       TARGET_DIR="$HOME/.config/opencode/skills"
       shift
       ;;
-    --override-idea-creator)
-      OVERRIDE_IDEA_CREATOR=true
+    --override-generic|--override-idea-creator)
+      OVERRIDE_GENERIC=true
       shift
       ;;
     -h|--help)
@@ -62,14 +65,15 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-for skill in sec-idea-discovery sec-research-lit sec-idea-creator sec-novelty-check sec-research-review sec-research-refine sec-experiment-plan sec-research-refine-pipeline sec-paper-writing; do
+for skill in sec-research-pipeline sec-idea-discovery sec-research-lit sec-idea-creator sec-novelty-check sec-research-review sec-research-refine sec-experiment-plan sec-research-refine-pipeline sec-experiment-bridge sec-auto-review-loop sec-paper-writing; do
   ln -sfn "$REPO_ROOT/skills/$skill" "$TARGET_DIR/$skill"
   echo "Linked: $TARGET_DIR/$skill -> $REPO_ROOT/skills/$skill"
 done
 
-if $OVERRIDE_IDEA_CREATOR; then
-  ln -sfn "$REPO_ROOT/skills/sec-idea-creator" "$TARGET_DIR/idea-creator"
-  echo "Linked override: $TARGET_DIR/idea-creator -> $REPO_ROOT/skills/sec-idea-creator"
-  ln -sfn "$REPO_ROOT/skills/sec-idea-discovery" "$TARGET_DIR/idea-discovery"
-  echo "Linked override: $TARGET_DIR/idea-discovery -> $REPO_ROOT/skills/sec-idea-discovery"
+if $OVERRIDE_GENERIC; then
+  for pair in "idea-creator:sec-idea-creator" "idea-discovery:sec-idea-discovery" "research-pipeline:sec-research-pipeline"; do
+    name="${pair%%:*}"; target="${pair##*:}"
+    ln -sfn "$REPO_ROOT/skills/$target" "$TARGET_DIR/$name"
+    echo "Linked override: $TARGET_DIR/$name -> $REPO_ROOT/skills/$target"
+  done
 fi

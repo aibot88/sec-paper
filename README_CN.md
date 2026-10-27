@@ -1,6 +1,6 @@
 # sec-paper：网络安全、Web 应用安全与系统安全科研论文套件
 
-`sec-paper` 是一套独立维护、可与 ARIS（Codex / OpenCode 多 Agent 科研框架）无缝组合的**网络安全、Web 应用安全与系统安全**全流程科研 Skill 仓库——从 `/sec-idea-discovery` 编排的完整选题流水线（`sec-research-lit → sec-idea-creator → sec-novelty-check → sec-research-review → sec-research-refine-pipeline`），到 Big-Four 顶会稿件写作与投稿前审计（`sec-paper-writing`）。
+`sec-paper` 是一套独立维护、可与 ARIS（Codex / OpenCode 多 Agent 科研框架）无缝组合的**网络安全、Web 应用安全与系统安全**全流程科研 Skill 仓库——`/sec-research-pipeline` 一条命令跑完**从研究方向到可投稿稿件**的全链路：`sec-idea-discovery`（选题流水线）→ `sec-experiment-bridge`（实验桥）→ `sec-auto-review-loop`（自动审稿循环）→ 叙事报告 → `sec-paper-writing`（顶会成稿+投稿审计）。
 
 目标顶会：**IEEE S&P (Oakland)、USENIX Security、ACM CCS、NDSS**，同时覆盖 **PETS、ACSAC、AsiaCCS、RAID**。
 
@@ -33,6 +33,9 @@
 | **[`skills/sec-research-refine/SKILL.md`](skills/sec-research-refine/SKILL.md)** | **双锚点细化**：Security Problem Anchor + Threat-Model Anchor 冻结，主张迁移必须显式记账 | 防止细化过程悄悄漂移威胁模型或缝合模块 |
 | **[`skills/sec-experiment-plan/SKILL.md`](skills/sec-experiment-plan/SKILL.md)** | **Claim→Evidence 矩阵 + RQ1–RQ4（含强制 A3）+ 消融 + 统计协议 + 伦理检查点** | 实验规划期就锁死 Oracle 与去重单位，规划阶段拒掉循环 Oracle |
 | **[`skills/sec-research-refine-pipeline/SKILL.md`](skills/sec-research-refine-pipeline/SKILL.md)** | **串接 refine → experiment-plan**，产出 FINAL_PROPOSAL + EXPERIMENT_PLAN + TRACKER + SUMMARY | 一键从选题走到可执行实验命令 |
+| **[`skills/sec-research-pipeline/SKILL.md`](skills/sec-research-pipeline/SKILL.md)** | **W0 总编排器**：discovery → bridge → review-loop → summary → writing；Gate 1 选题门 + Gate 2 写作门 + run_state 阶段记录 | 一条命令从方向走到投稿，`AUTO_WRITE`/`VENUE`/`AUTHORIZATION` 可控 |
+| **[`skills/sec-experiment-bridge/SKILL.md`](skills/sec-experiment-bridge/SKILL.md)** | **S1.5 实验桥**：解析 EXPERIMENT_PLAN → 实现 靶场+Oracle+去重+A3 组件 → 安全代码审查 → sanity → /run-experiment 或 /experiment-queue 部署 → Oracle 验证结果 → RESULT_TO_CLAIM 路由 | 交付的不是"指标"而是每行结果都带 Oracle 验证与去重单位的证据；阻断循环 Oracle 进实验 |
+| **[`skills/sec-auto-review-loop/SKILL.md`](skills/sec-auto-review-loop/SKILL.md)** | **S2 硬门控审稿循环**：5 条安全硬门（威胁模型/Oracle/A3/伦理/SHA 钉死）独立于分数，≤4 轮 review→fix→re-review | 分数再高硬门不过也不能 STOP；修复轮次上限防无限补丁循环 |
 | **[`skills/sec-paper-writing/SKILL.md`](skills/sec-paper-writing/SKILL.md)** | **Big-Four 章节骨架 + Threat Model 能力边界表 + A1/A2/A3 + Fact Pack 溯源 + USENIX '26 双必选附录** | 杜绝无威胁模型主张、无自适应攻击评估、数字打架和未钉死 SHA/CVE |
 | **[`references/web-and-system-threat-models.md`](references/web-and-system-threat-models.md)** | **W1–W6 六类 Web/系统攻击者模板 + A1/A2/A3 三级攻击者递进 + In/Out-of-Scope 表** | 选定方向后 3 分钟拉出标准威胁模型边界 |
 | **[`references/evaluation-and-oracle-discipline.md`](references/evaluation-and-oracle-discipline.md)** | **4 类合法 Oracle vs 4 类禁用循环 Oracle + 去重单位表 + 随机实验统计规范** | 防止把告警数、覆盖率、LLM 自评或单次短跑当成论文硬证据 |
@@ -58,15 +61,12 @@ bash /Users/aibot/script/sec-paper/tools/install_sec_paper.sh --codex
 调用示例：
 
 ```text
-# 全流程（推荐入口）：约束 → 文献 → 候选+Pilot → 查新 → PC审稿 → 细化+实验计划
-/sec-idea-discovery "Web API 网关与后端微服务之间的多租户鉴权状态不一致漏洞"
+# 端到端全流程（推荐入口）：方向 → 选题 → 实验 → 审稿循环 → 报告 → 投稿成稿
+/sec-research-pipeline "Web API 网关与后端微服务之间的多租户鉴权状态不一致漏洞" — venue: USENIX_SEC
 
-# 或单步独立调用
-/sec-research-lit "stateful web fuzzing"
-/sec-idea-creator "跨租户 BOLA"
-/sec-novelty-check "候选主张描述"
-/sec-research-review "idea-stage/IDEA_REPORT.md"
-/sec-research-refine "问题 | 初步方法"
-/sec-experiment-plan "refine-logs/FINAL_PROPOSAL.md"
+# 或从中间阶段进入
+/sec-idea-discovery "跨租户 BOLA"           # 选题流水线（含 pilot）
+/sec-experiment-bridge "EXPERIMENT_PLAN.md"  # 实现 harness+Oracle+A3 → 部署 → 收集证据
+/sec-auto-review-loop "results/"             # 硬门控自动审稿循环
 /sec-paper-writing "NARRATIVE_REPORT.md" — venue: USENIX_SEC
 ```
